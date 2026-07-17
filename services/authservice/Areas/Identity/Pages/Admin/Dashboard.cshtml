@@ -1,0 +1,250 @@
+@page
+@model AuthService.Pages.Admin.UsersModel
+@{
+    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";;
+    ViewData["Title"] = "Users Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="dashboard-title">Users Dashboard</h2>
+                <a href="/Admin/CreateUser" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i>Add New User
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h4>
+                    <span class="badge bg-info">@Model.Users.Count Users</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="25%"><i class="fas fa-envelope me-2"></i>Email</th>
+                                    <th width="20%"><i class="fas fa-user me-2"></i>Username</th>
+                                    <th width="25%"><i class="fas fa-tags me-2"></i>Roles</th>
+                                    <th width="30%"><i class="fas fa-cogs me-2"></i>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Users.Any())
+                                {
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        var roles = Model.UserRoles.ContainsKey(user.Id) ? 
+                                                   string.Join(", ", Model.UserRoles[user.Id]) : 
+                                                   "No roles assigned";
+                                        
+                                        <tr class="align-middle">
+                                            <td class="fw-medium">
+                                                <i class="fas fa-envelope-open-text me-2 text-muted"></i>
+                                                @user.Email
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user-circle me-2 text-muted"></i>
+                                                @user.UserName
+                                            </td>
+                                            <td>
+                                                <div class="roles-container">
+                                                    @if (Model.UserRoles.ContainsKey(user.Id) && Model.UserRoles[user.Id].Any())
+                                                    {
+                                                        @foreach (var role in Model.UserRoles[user.Id])
+                                                        {
+                                                            <span class="badge bg-secondary me-1 mb-1">@role</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning text-dark">No Roles</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="actions-container">
+                                                    <!-- Add Role Form -->
+                                                    <form method="post" asp-page-handler="AddRole" class="d-inline-block me-2">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <div class="input-group input-group-sm">
+                                                            <select name="role" class="form-select form-select-sm">
+                                                                @foreach (var role in Model.Roles)
+                                                                {
+                                                                    <option value="@role.Name">@role.Name</option>
+                                                                }
+                                                            </select>
+                                                            <button type="submit" class="btn btn-outline-primary btn-sm" title="Add Role">
+                                                                <i class="fas fa-plus"></i>Add role
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                    <!-- Remove Role Form -->
+                                                    <form method="post" asp-page-handler="RemoveRole" class="d-inline-block">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <div class="input-group input-group-sm">
+                                                            <select name="role" class="form-select form-select-sm">
+                                                                @if (Model.UserRoles.ContainsKey(user.Id))
+                                                                {
+                                                                    @foreach (var role in Model.UserRoles[user.Id])
+                                                                    {
+                                                                        <option value="@role">@role</option>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="">No roles to remove</option>
+                                                                }
+                                                            </select>
+                                                            <button type="submit" 
+                                                                    class="btn btn-outline-warning btn-sm" 
+                                                                    title="Remove Role"
+                                                                    @(Model.UserRoles.ContainsKey(user.Id) && Model.UserRoles[user.Id].Any() ? "" : "disabled")>
+                                                                <i class="fas fa-minus"></i>Remove role
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                    @if (!user.EmailConfirmed)
+                                                    {
+                                                        <form method="post" asp-page-handler="ConfirmEmail" class="d-inline-block me-2">
+                                                            <input type="hidden" name="userId" value="@user.Id" />
+                                                            <button type="submit" 
+                                                                    class="btn btn-outline-success btn-sm" 
+                                                                    title="Mark email as confirmed">
+                                                                <i class="fas fa-check-circle me-1"></i>Confirm Email
+                                                            </button>
+                                                        </form>
+                                                    }
+
+                                                    @if (user.LockoutEnd != null)
+                                                    {
+                                                        <form method="post" asp-page-handler="EndLockout" class="d-inline-block me-2">
+                                                            <input type="hidden" name="userId" value="@user.Id" />
+                                                            <button type="submit" 
+                                                                    class="btn btn-outline-success btn-sm" 
+                                                                    title="End lockout">
+                                                                <i class="fas fa-check-circle me-1"></i>End lockout
+                                                            </button>
+                                                        </form>
+                                                    }
+
+                                                    <!-- Delete User Form -->
+                                                    <form method="post" asp-page-handler="DeleteUser" class="d-inline-block me-2">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <button type="submit" 
+                                                                class="btn btn-outline-danger btn-sm" 
+                                                                title="Delete User"
+                                                                onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                                                            <i class="fas fa-trash-alt"></i>Delete
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                            <p class="text-muted mb-0">No users found. <a href="/Admin/CreateUser">Add a new user</a> to get started.</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-title {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        border-radius: 8px;
+        border: none;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .roles-container {
+        min-height: 38px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .actions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: inherit;
+    }
+
+    .input-group {
+        max-width: 200px;
+    }
+
+    .form-select-sm, .btn-sm {
+        font-size: 0.875rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #555;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    @@media (max-width: 768px) {
+        .actions-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .input-group {
+            max-width: 100%;
+        }
+        
+        .table-responsive {
+            font-size: 0.9em;
+        }
+    }
+</style>

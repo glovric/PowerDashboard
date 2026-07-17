@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.py[cod]
+**/.venv
+
+# .NET
+**/bin
+**/obj
+
+# Models
+**/models
+**/*.ubj
+
+# Logs
+**/logs
+**/*.log
+
+# IDE
+**/.idea
+**/.vscode
+
+# Build artifacts
+**/dist
+**/build
+**/*.egg-info
+
+# Misc
+**/.DS_Store
+**/README.md
+**/todo
+**/Dockerfile

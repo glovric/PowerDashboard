@@ -1,0 +1,15 @@
+.euromap-wrapper {
+  width: 100%;
+}
+
+.map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#map {
+  height: 500px;
+  width: 60%;
+  z-index: 1;
+}

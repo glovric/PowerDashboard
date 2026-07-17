@@ -1,0 +1,22 @@
+{
+  "FrontJwtSettings": {
+    "Issuer": "https://api.myapp.com",
+    "Audience": "https://app.myapp.com"
+  },
+  "ServiceJwtSettings": {
+    "Issuer": "https://auth.myapp.com",
+    "Audience": "internal-services"
+  },
+  "Services": {
+    "AuthService": "http://authservice:8080",
+    "PowerService": "http://powerservice:8080"  
+  },
+  "SuperUserSettings": {
+    "UserName": "admin",
+    "Email": "admin@admin.com"
+  },
+  "DataFiles": {
+    "TimeSeries60": "/data/time_series_60.csv",
+    "TimeSeries15": "/data/time_series_15.csv"
+  }
+}

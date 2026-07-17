@@ -1,0 +1,189 @@
+services:
+
+  gateway:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: nginx-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - authservice
+      - powerservice
+      - inferenceservice
+    networks:
+      - powerdashboard-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres-container
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${pguser}
+      POSTGRES_PASSWORD: ${pgpass}
+      POSTGRES_DB: ${pgdb}
+    expose:
+      - "5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - powerdashboard-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${pguser} -d ${pgdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+  
+  powerservice:
+    build:
+      context: ./services
+      dockerfile: powerservice/Dockerfile
+    container_name: powerservice-container
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?missing}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?missing}
+      FrontJwtSettings__Key: ${FrontJwtSettings__Key:?missing}
+      ServiceJwtSettings__Key: ${ServiceJwtSettings__Key:?missing}
+      ServiceAPIKeys__InferenceService: ${ServiceAPIKeys__InferenceService:?missing}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./services/Shared/sharedsettings.Production.json:/Shared/sharedsettings.Production.json # Mount prod settings
+    expose:
+      - "8080"
+    networks:
+      - powerdashboard-network
+    
+  powerservice-migrate:
+    build:
+      context: ./services
+      dockerfile: powerservice/Dockerfile
+    container_name: powerservice-migrate-container
+    restart: "no"
+    environment:
+      MODE: migrate
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?missing}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?missing}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - powerdashboard-network
+    profiles:
+      - migration
+
+  powerservice-seed:
+    build:
+      context: ./services
+      dockerfile: powerservice/Dockerfile
+    container_name: powerservice-seed-container
+    restart: "no"
+    environment:
+      MODE: seed
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?missing}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?missing}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/time_series_15.csv:/data/time_series_15.csv
+      - ./data/time_series_60.csv:/data/time_series_60.csv
+      - ./services/Shared/sharedsettings.Production.json:/Shared/sharedsettings.Production.json
+    networks:
+      - powerdashboard-network
+    profiles:
+      - seed
+
+  authservice:
+    build:
+      context: ./services
+      dockerfile: authservice/Dockerfile
+    container_name: authservice-container
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      FrontJwtSettings__Key: ${FrontJwtSettings__Key}
+      ServiceJwtSettings__Key: ${ServiceJwtSettings__Key}
+      ServiceAPIKeys__InferenceService: ${ServiceAPIKeys__InferenceService}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+    - ./services/Shared/sharedsettings.Production.json:/Shared/sharedsettings.Production.json # Mount prod settings
+    expose:
+      - "8080"
+    networks:
+    - powerdashboard-network
+
+  authservice-migrate:
+    build:
+      context: ./services
+      dockerfile: authservice/Dockerfile
+    container_name: authservice-migrate-container
+    restart: "no"
+    environment:
+      MODE: migrate
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?missing}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?missing}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - powerdashboard-network
+    profiles:
+      - migration
+
+  authservice-seed:
+    build:
+      context: ./services
+      dockerfile: authservice/Dockerfile
+    container_name: authservice-seed-container
+    restart: "no"
+    environment:
+      MODE: seed
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?missing}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?missing}
+      SuperUserSettings__Password: ${SuperUserSettings__Password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./services/Shared/sharedsettings.Production.json:/Shared/sharedsettings.Production.json
+    networks:
+      - powerdashboard-network
+    profiles:
+      - seed
+
+  inferenceservice:
+    build:
+      context: ./services
+      dockerfile: inferenceservice/Dockerfile
+    container_name: inferenceservice-container
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      FrontJwtSettings__Key: ${FrontJwtSettings__Key}
+      ServiceAPIKeys__InferenceService: ${ServiceAPIKeys__InferenceService}
+    depends_on:
+      - authservice
+      - powerservice
+    volumes:
+    - ./services/Shared/sharedsettings.Production.json:/Shared/sharedsettings.Production.json # Mount prod settings
+    - ./services/inferenceservice/models:/app/models
+    expose:
+      - "8080"
+    networks:
+    - powerdashboard-network
+
+volumes:
+  postgres-data:
+
+networks:
+  powerdashboard-network:
+    driver: bridge

@@ -1,0 +1,21 @@
+:root {
+  --bg-primary: #f9fafb;
+  --bg-secondary: rgba(255, 255, 255, 1);
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #42a5f5;
+  --accent-soft: rgba(66, 165, 245, 0.25);
+
+  --shadow-card: 
+    0 0 0 1px rgba(66, 165, 245, 0),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+
+  /* Hover / focus shadow */
+  --shadow-card-hover:
+    0 0 0 1px rgba(66, 165, 245, 0.45),
+    0 12px 32px rgba(66, 165, 245, 0.18);
+
+  --error-bg: #ffebee;
+  --error-text: #c62828;
+}

@@ -1,0 +1,12 @@
+html.dark {
+  --bg-primary: #1f2937;
+  --bg-secondary: rgba(17, 24, 39, 1);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #374151;
+  --accent: #42a5f5;
+  --accent-soft: rgba(66, 165, 245, 0.35);
+
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(231, 240, 248, 0.15);
+  --shadow-card-hover: 0 0 0 1px rgba(66, 165, 245, 0.45), 0 12px 32px rgba(66, 164, 245, 0.18);
+}

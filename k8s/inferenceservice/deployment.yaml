@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inferenceservice
+  labels:
+    app: inferenceservice
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: inferenceservice
+
+  template:
+    metadata:
+      labels:
+        app: inferenceservice
+
+    spec:
+      containers:
+        - name: inferenceservice
+          image: powerdashboard-inferenceservice
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: FrontJwtSettings__Key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: FrontJwtSettings__Key
+
+            - name: ServiceAPIKeys__InferenceService
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ServiceAPIKeys__InferenceService
+
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ASPNETCORE_ENVIRONMENT
+
+          volumeMounts:
+
+            - name: models
+              mountPath: /app/models
+
+            - name: shared-settings
+              mountPath: /Shared/sharedsettings.Production.json
+              subPath: sharedsettings.Production.json
+
+      volumes:
+
+        - name: shared-settings
+          configMap:
+            name: shared-settings
+
+        - name: models
+          hostPath:
+            path: /models
+            type: Directory

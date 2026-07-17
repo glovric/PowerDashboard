@@ -1,0 +1,202 @@
+.settings-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* --- Cog Button --- */
+.settings-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--bg-primary, #fff);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted, #64748b);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent);
+  }
+
+  &.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* --- Dropdown Menu --- */
+.settings-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.dropdown-header {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text, #94a3b8);
+  border-bottom: 1px solid var(--border, #f1f5f9);
+}
+
+.dropdown-content {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  html.dark & {
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
+
+.item-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text, #334155);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border, #e2e8f0);
+  margin: 4px 8px;
+}
+
+/* --- Mini Toggle inside Dropdown --- */
+.toggle-row {
+  cursor: pointer;
+}
+
+.mini-toggle {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: #10b981;
+
+      &:before {
+        transform: translateX(14px);
+      }
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 34px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+/* --- Segmented Control inside Dropdown --- */
+.view-toggle-segmented {
+  display: flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.segment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  &.active {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    
+    // Ensures hover doesn't override active state visuals
+    &:hover {
+      color: #0f172a;
+      background: white;
+    }
+  }
+}
+
+/* --- Animation --- */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transform-origin: top right;
+}

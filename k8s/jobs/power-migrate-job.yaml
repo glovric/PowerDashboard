@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: powerservice-migrate
+spec:
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: powerservice-migrate
+          image: powerdashboard-powerservice
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: MODE
+              value: migrate
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ConnectionStrings__DefaultConnection
+
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ASPNETCORE_ENVIRONMENT

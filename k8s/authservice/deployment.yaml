@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+  labels:
+    app: authservice
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: authservice
+
+  template:
+    metadata:
+      labels:
+        app: authservice
+
+    spec:
+      containers:
+        - name: authservice
+          image: powerdashboard-authservice
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: FrontJwtSettings__Key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: FrontJwtSettings__Key
+
+            - name: ServiceJwtSettings__Key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ServiceJwtSettings__Key
+
+            - name: ServiceAPIKeys__InferenceService
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ServiceAPIKeys__InferenceService
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ConnectionStrings__DefaultConnection
+
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ASPNETCORE_ENVIRONMENT
+
+          volumeMounts:
+            - name: shared-settings
+              mountPath: /Shared/sharedsettings.Production.json
+              subPath: sharedsettings.Production.json
+
+      volumes:
+        - name: shared-settings
+          configMap:
+            name: shared-settings

@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: powerservice-seed
+spec:
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: powerservice-seed
+          image: powerdashboard-powerservice
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: MODE
+              value: seed
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ConnectionStrings__DefaultConnection
+
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ASPNETCORE_ENVIRONMENT
+          
+          volumeMounts:
+          
+            - name: csv-data
+              mountPath: /data/time_series_15.csv
+              subPath: time_series_15.csv
+
+            - name: csv-data
+              mountPath: /data/time_series_60.csv
+              subPath: time_series_60.csv
+
+            - name: shared-settings
+              mountPath: /Shared/sharedsettings.Production.json
+              subPath: sharedsettings.Production.json
+
+      volumes:
+
+        - name: csv-data
+          hostPath:
+            path: /data
+            type: Directory
+
+        - name: shared-settings
+          configMap:
+            name: shared-settings

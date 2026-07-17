@@ -1,0 +1,46 @@
+.loading-toast-message {
+  position: fixed;
+  bottom: 1rem;
+  right: 2rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background-color: #F5F7FA; /* Very light gray-blue (almost white but distinct) */
+  color: #2D3748; /* Dark gray for readability */
+  border-left: 4px solid #4299E1; /* Friendly blue accent (Tailwind "blue-400") */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Subtle depth */
+}
+
+.loading-spinner {
+  width: 15px;
+  height: 15px;
+  border: 5px solid rgba(66, 153, 225, 0.3); /* Blue-tinted track */
+  border-top: 5px solid #4299E1; /* Matches accent */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Transition */
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.toast-enter-to,
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}

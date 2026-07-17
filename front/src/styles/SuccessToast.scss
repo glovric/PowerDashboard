@@ -1,0 +1,35 @@
+.success-message {
+  position: fixed;
+  bottom: 1rem;
+  right: 2rem;
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  gap: 1rem;
+  align-items: center;
+
+  background-color: #b7e4c7;
+  color: #145a32;
+  border-left: 4px solid #2d6a4f;
+
+  p {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.toast-enter-to,
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}

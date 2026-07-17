@@ -1,0 +1,97 @@
+{
+  "FrontJwtSettings": {
+    "ExpirationMinutes": 15,
+    "RefreshMinutes": 30
+  },
+  "ServiceJwtSettings": {
+    "ExpirationMinutes": 5,
+    "RefreshMinutes": 0
+  },
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.File",
+      "Serilog.Filters.Expressions",
+      "Serilog.Enrichers.Context"
+    ],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "restrictedToMinimumLevel": "Information",
+          "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+        },
+        "Filter": [
+          {
+            "Name": "ByIncludingOnly",
+            "Args": {
+              "expression": "@l = 'Information' and (SourceContext = 'Microsoft.EntityFrameworkCore.Database.Command' or SourceContext = 'Microsoft.Hosting.Lifetime')"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "logs/info-.log",
+          "rollingInterval": "Day",
+          "restrictedToMinimumLevel": "Information",
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        },
+        "Filter": [
+          {
+            "Name": "ByIncludingOnly",
+            "Args": {
+              "expression": "@l = 'Information'"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "logs/warn-.log",
+          "rollingInterval": "Day",
+          "restrictedToMinimumLevel": "Warning",
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        },
+        "Filter": [
+          {
+            "Name": "ByIncludingOnly",
+            "Args": {
+              "expression": "@l = 'Warning'"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "logs/error-.log",
+          "rollingInterval": "Day",
+          "restrictedToMinimumLevel": "Error",
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        },
+        "Filter": [
+          {
+            "Name": "ByIncludingOnly",
+            "Args": {
+              "expression": "@l = 'Error' or @l = 'Fatal'"
+            }
+          }
+        ]
+      }
+    ],
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
+  },
+  "AllowedHosts": "*"
+}

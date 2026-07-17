@@ -1,0 +1,25 @@
+{
+  "FrontJwtSettings": {
+    "Issuer": "http://localhost:5253",
+    "Audience": "http://localhost:5169"
+  },
+  "ServiceJwtSettings": {
+    "Issuer": "http://localhost:5253",
+    "Audience": "http://localhost:5169"
+  },
+  "Services": {
+    "AuthService": "http://localhost:5253",
+    "PowerService": "http://localhost:5169"
+  },
+  "SuperUserSettings": {
+    "UserName": "admin",
+    "Email": "admin@admin.com"
+  },
+  "AllowedOrigins": [
+    "http://localhost:8080" 
+  ],
+  "DataFiles": {
+    "TimeSeries60": "../../data/time_series_60.csv",
+    "TimeSeries15": "../../data/time_series_15.csv"
+  }
+}

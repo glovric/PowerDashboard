@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: authservice-seed
+spec:
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: authservice-seed
+          image: powerdashboard-authservice
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: MODE
+              value: seed
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ConnectionStrings__DefaultConnection
+
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: ASPNETCORE_ENVIRONMENT
+
+            - name: SuperUserSettings__Password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: SuperUserSettings__Password
+          
+          volumeMounts:
+
+            - name: shared-settings
+              mountPath: /Shared/sharedsettings.Production.json
+              subPath: sharedsettings.Production.json
+
+      volumes:
+
+        - name: shared-settings
+          configMap:
+            name: shared-settings

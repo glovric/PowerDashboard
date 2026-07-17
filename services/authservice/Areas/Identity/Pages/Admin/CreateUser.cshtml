@@ -1,0 +1,92 @@
+@page
+@model AuthService.Pages.Admin.CreateUserModel
+@{
+    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";;
+    ViewData["Title"] = "Create New User";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="dashboard-title">Create New User</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Add New User</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="NewUserEmail" class="form-label fw-bold">Email</label>
+                            <input type="email" 
+                                   name="NewUserEmail" 
+                                   id="NewUserEmail" 
+                                   class="form-control" 
+                                   placeholder="Enter email address" 
+                                   required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="NewUserName" class="form-label fw-bold">Username</label>
+                            <input type="text" 
+                                   name="NewUserName" 
+                                   id="NewUserName" 
+                                   class="form-control" 
+                                   placeholder="Enter username" 
+                                   required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="NewUserPassword" class="form-label fw-bold">Password</label>
+                            <input type="password" 
+                                   name="NewUserPassword" 
+                                   id="NewUserPassword" 
+                                   class="form-control" 
+                                   placeholder="Enter password" 
+                                   required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="NewUserRole" class="form-label fw-bold">Role</label>
+                            <select name="NewUserRole" id="NewUserRole" class="form-select">
+                                <option value="" selected> </option>
+                                @foreach (var role in Model.Roles)
+                                {
+                                    <option value="@role.Name">@role.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success btn-lg me-2">
+                                <i class="fas fa-plus-circle me-2"></i>Create User
+                            </button>
+                            <a href="/Admin/Dashboard" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-title {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        border-radius: 8px;
+        border: none;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .form-label {
+        color: #555;
+    }
+</style>

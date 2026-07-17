@@ -1,0 +1,65 @@
+.table-wrapper {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  max-width: 90%;   // control table width
+  margin: 0 auto;     // center horizontally
+
+  .table-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  gap: 1rem;
+
+  .btn-download {
+    height: 34px; 
+    padding: 0 1rem;
+    color: var(--text);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: var(--accent);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+  }
+  
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+
+  tbody tr:hover {
+    background: var(--accent-soft);
+  }
+
+}

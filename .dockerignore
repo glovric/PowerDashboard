@@ -1,0 +1,13 @@
+# Ignore everything
+**
+
+# Include the directories you need
+!nginx/
+!nginx/**
+
+!front/
+!front/**
+
+# Exclude node_modules
+front/node_modules/
+front/node_modules/**
