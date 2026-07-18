@@ -17,47 +17,59 @@ The application is composed of multiple services, each having a separate respons
 
 ## Getting Started
 
-Before running the application with **Docker** or in **local development mode** the required power data must be downloaded to your local machine. The download script requires Python and Python dependencies exclusive to this script.
+Before running the application with **Docker** or in **local development mode** download the required power data and train the ML models. These setup scripts require Python.
 
 ### Prerequisites
 
 * **[uv](https://docs.astral.sh/uv/)** (recommended), or
 * **[Python](https://www.python.org/downloads/) + pip**
 
-### 1. Install Python Dependencies
+### 1. Set up the Python environments
 
 #### Option 1: Using `uv` (recommended)
 
 ```bash
+# Install dependencies in root folder for download script
 uv sync
+
+cd ml_experiments
+
+# Install dependencies for model training script
+uv sync
+# Install folder package
+uv pip install -e .
 ```
 
 #### Option 2: Using `pip`
 
-1. Create a virtual environment:
-
 ```bash
+# Create and activate virtual environment in the project root
 python -m venv .venv
-```
 
-2. Activate the virtual environment:
-
-**PowerShell**
-
-```powershell
+# PowerShell
 .\.venv\Scripts\Activate.ps1
-```
-
-**Bash**
-
-```bash
+# Bash
 source .venv/bin/activate
-```
 
-3. Install the dependencies:
-
-```bash
+# Install dependencies for the data download script
 pip install -r requirements.txt
+deactivate
+
+cd ml_experiments
+
+# Create and activate virtual environment in ml_experiments
+python -m venv .venv
+
+# PowerShell
+.\.venv\Scripts\Activate.ps1
+# Bash
+source .venv/bin/activate
+
+# Install dependencies in ml_experiments for the model training script
+pip install -r requirements.txt
+
+# Install the package in editable mode
+pip install -e .
 ```
 
 ### 2. Download the Data
@@ -73,10 +85,28 @@ After installing the Python dependencies, run the data download script.
 **Bash**
 
 ```bash
+chmod +x ./data/download_data.sh
 ./data/download_data.sh
 ```
 
-Once the download completes, continue with either the **Docker Setup** or **Local Development** section below.
+### 3. Train the models
+
+```bash
+cd ml_experiments
+
+# Activate virutal environment
+.venv\Scripts\activate
+
+# Run training script
+python scripts/train.py
+
+# Copy models folder to inferenceservice (Powershell)
+robocopy models ..\services\inferenceservice\models /E
+# Bash
+cp -r models/. ../services/inferenceservice/
+```
+
+Once data download and model training are completed, continue with either the **Docker Setup** or **Local Development** section below.
 
 ## Docker Setup
 
