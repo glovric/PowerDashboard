@@ -77,7 +77,7 @@ gateway:
 To stop all running containers:
 
 ```bash
-docker compose down
+docker compose stop
 ```
 
 ## Troubleshooting
