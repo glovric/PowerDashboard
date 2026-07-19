@@ -12,7 +12,7 @@ To run the application in **local development mode**, install the required devel
 | **Database** | [PostgreSQL](https://www.postgresql.org/download/) |
 | **Data Service** | [.NET 10.0 SDK](https://dotnet.microsoft.com/download) |
 | **Auth Service** | [.NET 10.0 SDK](https://dotnet.microsoft.com/download) |
-| **ML Service**   | [Python (pip)](https://www.python.org/) or [uv](https://docs.astral.sh/uv/) |
+| **Inference Service**   | [Python (pip)](https://www.python.org/) or [uv](https://docs.astral.sh/uv/) |
 
 ## 1. Configure Environment Variables
 
@@ -29,16 +29,18 @@ ASPNETCORE_ENVIRONMENT=Development
 
 ⚠️ **Important** Adjust the `ConnectionStrings__DefaultConnection` property to match your local PostgreSQL configuration.
 
-## 2. Start each component
+## 2. Start PostgreSQL database server
+
+Ensure a PostgreSQL instance is running and accepting connections.
+
+## 3. Start each component
 
 You will need 4 separate terminal sessions running simultaneously:
 
 1. **Frontend** - See [frontend/README.md](../front/README.md) for instructions
-2. **Powerservice** - See [frontend/README.md](../services/powerservice/README.md) for instructions
-3. **Authservice** - See [frontend/README.md](../services/authservice/README.md) for instructions
-4. **Inferenceservice** - See [frontend/README.md](../services/inferenceservice/README.md) for instructions
-
-Each component's folder contains its own README with specific setup instructions.
+2. **Powerservice** - See [powerservice/README.md](../services/powerservice/README.md) for instructions
+3. **Authservice** - See [authservice/README.md](../services/authservice/README.md) for instructions
+4. **Inferenceservice** - See [inferenceservice/README.md](../services/inferenceservice/README.md) for instructions
 
 ## 3. Access the application
 
