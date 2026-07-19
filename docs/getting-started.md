@@ -99,4 +99,4 @@ Once data download and model training are completed, proceed with your preferred
 - 💻 **[Local Development](local-development.md)**
 - ☸️ **[Kubernetes](kubernetes.md)** 
 
-<- Back to main README
+[← Back to Main README](../README.md)

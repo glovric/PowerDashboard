@@ -85,3 +85,5 @@ docker compose down
 - Ensure Docker Desktop is running
 - Check that ports are not already in use
 - Verify `.env` file configuration matches your setup
+
+[← Back to Main README](../README.md)

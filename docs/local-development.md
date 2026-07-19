@@ -44,4 +44,4 @@ Each component's folder contains its own README with specific setup instructions
 
 Once all services are running, open the application in your browser at **http://localhost:8080**.
 
-<- Back to main README
+[← Back to Main README](../README.md)
