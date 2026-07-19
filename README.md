@@ -2,14 +2,6 @@
 
 Dashboard web application which displays power load data of European countries.
 
-## Quick Start
-
-Choose your preferred setup method:
-
-- 🐳 **[Docker Setup](docs/docker-setup.md)** - Recommended for production/testing
-- 💻 **[Local Development](docs/local-development.md)** - For development and debugging
-- ☸️ **[Kubernetes](docs/kubernetes-setup.md)** - For container orchestration
-
 ## Architecture Overview
 
 The application is composed of multiple microservices:
@@ -28,6 +20,14 @@ The application is composed of multiple microservices:
 Before running the application, you need to download power data and train ML models. **This step is required for all setup methods**.
 
 👉 **[Complete Getting Started Guide](docs/getting-started.md)**
+
+## Quick Start
+
+Choose your preferred setup method:
+
+- 🐳 **[Docker Setup](docs/docker-setup.md)** - Recommended for production/testing
+- 💻 **[Local Development](docs/local-development.md)** - For development and debugging
+- ☸️ **[Kubernetes](docs/kubernetes-setup.md)** - For container orchestration
 
 ## Documentation
 
