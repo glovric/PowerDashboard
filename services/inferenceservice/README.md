@@ -1,6 +1,6 @@
 # Inference Service
 
-This service provides frontend and inference service with JWT tokens. The service is also responsible for user management using ASP.NET Core Identity and provides an admin dashboard.
+This service provides frontend with machine learning model (XGBoost) inference results.
 
 ## Local setup
 
