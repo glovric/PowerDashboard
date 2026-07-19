@@ -4,7 +4,7 @@ To run the application in **local development mode**, install the required devel
 
 ## Prerequisites
 
-Complete the [Getting started](../README.md) steps first (data download & model training).
+* Complete the [Getting started](../README.md) steps first (data download & model training).
 
 | Component | Prerequisite |
 |-----------|--------------|

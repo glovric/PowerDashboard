@@ -9,7 +9,7 @@ You need Python to run the setup scripts. Choose one of the following options:
 * **[uv](https://docs.astral.sh/uv/)** (recommended) - Fast Python package installer
 * **[Python](https://www.python.org/downloads/) + pip** - Standard Python installation
 
-## Step 1: Set up Python Environments
+## 1. Set up Python Environments
 
 ### Option 1: Using `uv` (Recommended)
 

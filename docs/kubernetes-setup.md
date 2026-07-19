@@ -2,6 +2,7 @@
 
 ## Prerequisites
 
+* Complete the [Getting started](./getting-started.md) steps first (data download & model training)
 * **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (or other Kubernetes runtime)
 * **[minikube](https://minikube.sigs.k8s.io/docs/start/)**
 * **[kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)** (bundled with Docker Desktop)
