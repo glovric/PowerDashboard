@@ -79,8 +79,10 @@ chmod +x ./data/download_data.sh
 ```bash
 cd ml_experiments
 
-# Activate virutal environment
+# Activate virutal environment (Powershell)
 .venv\Scripts\activate
+# Bash
+source .venv/bin/activate
 
 # Run training script
 python scripts/train.py
@@ -88,7 +90,7 @@ python scripts/train.py
 # Copy models folder to inferenceservice (Powershell)
 robocopy models ..\services\inferenceservice\models /E
 # Bash
-cp -r models/. ../services/inferenceservice/
+cp -r models/. ../services/inferenceservice/models
 ```
 
 ## Next steps
