@@ -60,4 +60,14 @@ namespace PowerService.Models {
         public List<Dictionary<string, object>> Rows { get; set; } = [];
     }
 
+    public class TransmissionRequest
+    {
+
+        [Required(ErrorMessage = "Interval cannot be empty")]
+        public int Interval { get; set; }
+        
+        [Required(ErrorMessage = "Date cannot be empty")]
+        public DateTime Date { get; set; }
+
+    }
 }

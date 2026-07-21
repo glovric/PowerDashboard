@@ -110,6 +110,14 @@ namespace PowerService.Controllers
             return Ok(status);
         }
 
+        [HttpPost("transmission_status")]
+        //[Authorize(Policy = AuthPolicies.FrontendPrivate)]
+        public async Task<ActionResult<PowerDataBase>> GetTransmissionStatus([FromBody] TransmissionRequest request)
+        {
+            var status = _service.GetTransmissionStatus(request.Date, request.Interval);
+            return Ok(status);
+        }
+
         [HttpPost("export")]
         [Authorize(Policy = AuthPolicies.FrontendPrivate)]
         public async Task<IActionResult> ExportTableData([FromBody] ExportRequest request)

@@ -58,4 +58,10 @@ namespace PowerService.Models
         public string TimestampLabel { get; set; } = default!;
         public double? LoadValue { get; set; }
     }
+
+    public class TransmissionResponse
+    {
+        public string Timestamp { get; set; } = default!;
+        public Dictionary<string, double?> Loads { get; set; } = new();
+    }
 }

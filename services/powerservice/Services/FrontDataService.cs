@@ -328,5 +328,80 @@ namespace PowerService.Services
                     : ExportExcel(request);
         }
 
+        public List<TransmissionResponse> GetTransmissionStatus(DateTime date, int interval)
+        {
+
+            var startDate = date;
+            var endDate = date.AddDays(1);
+
+            if (interval == 60)
+            {
+                IQueryable<PowerDataHour> query = _context.PowerDataHour;
+                var dbResults = query
+                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
+                            .OrderBy(p => p.Timestamp)
+                            .Select(p => new TransmissionResponse {
+                                Timestamp = p.Timestamp.ToString(),
+                                Loads = new Dictionary<string, double?> {
+                                    { "AT", p.ATLoadValue },
+                                    { "BE", p.BELoadValue },
+                                    { "BG", p.BGLoadValue },
+                                    { "CH", p.CHLoadValue },
+                                    { "CY", p.CYLoadValue },
+                                    { "CZ", p.CZLoadValue },
+                                    { "DE", p.DELoadValue },
+                                    { "DK", p.DKLoadValue },
+                                    { "EE", p.EELoadValue },
+                                    { "ES", p.ESLoadValue },
+                                    { "FI", p.FILoadValue },
+                                    { "FR", p.FRLoadValue },
+                                    { "GB", p.GBLoadValue },
+                                    { "GR", p.GRLoadValue },
+                                    { "HR", p.HRLoadValue },
+                                    { "HU", p.HULoadValue },
+                                    { "IE", p.IELoadValue },
+                                    { "IT", p.ITLoadValue },
+                                    { "LT", p.LTLoadValue },
+                                    { "LU", p.LULoadValue },
+                                    { "LV", p.LVLoadValue },
+                                    { "ME", p.MELoadValue },
+                                    { "NL", p.NLLoadValue },
+                                    { "NO", p.NOLoadValue },
+                                    { "PL", p.PLLoadValue },
+                                    { "PT", p.PTLoadValue },
+                                    { "RO", p.ROLoadValue },
+                                    { "RS", p.RSLoadValue },
+                                    { "SE", p.SELoadValue },
+                                    { "SI", p.SILoadValue },
+                                    { "SK", p.SKLoadValue },
+                                    { "UA", p.UALoadValue }
+                                    }
+                                })
+                            .ToList();
+                Console.WriteLine($"Kolicina dbresults: {dbResults.Count}");
+                return dbResults;
+            }
+            else {
+                IQueryable<PowerDataQuarter> query = _context.PowerDataQuarter;
+                var dbResults = query
+                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
+                            .OrderBy(p => p.Timestamp)
+                            .Select(p => new TransmissionResponse {
+                                Timestamp = p.Timestamp.ToString(),
+                                Loads = new Dictionary<string, double?> {
+                                    { "AT", p.ATLoadValue },
+                                    { "BE", p.BELoadValue },
+                                    { "HU", p.HULoadValue },
+                                    { "LU", p.LULoadValue },
+                                    { "NL", p.NLLoadValue },
+                                    }
+                                })
+                            .ToList();
+                Console.WriteLine($"Kolicina dbresults: {dbResults.Count}");
+                return dbResults;
+            }
+
+        }        
+
     }
 }
