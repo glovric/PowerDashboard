@@ -1,20 +1,47 @@
 <template>
   <div class="power-load-status">
     <h2>Power Load Transmission Status</h2>
-    
-    <!-- Legend -->
-    <div class="legend">
-      <div class="legend-item">
-        <div class="color-box available"></div>
-        <span>Data Available</span>
-      </div>
-      <div class="legend-item">
-        <div class="color-box unavailable"></div>
-        <span>Data Unavailable</span>
-      </div>
+
+    <div class="controls">
+
+        <div class="controls-left">
+
+            <div class="controls-left-first">
+                <div class="control-group">
+                    <label>Interval</label>
+                    <select v-model="interval" class="dropdown">
+                        <option :value="15">15 Minutes</option>
+                        <option :value="60">1 Hour</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="controls-left-second">
+                <div class="control-group">
+                    <label>Forecast Date & Time</label>
+                    <Flatpickr
+                    v-model="forecastDate"
+                    :config="datePickerConfig"
+                    class="datepicker"
+                    placeholder="Select forecast date"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-right">
+            <div class="legend-item">
+                <div class="color-box available"></div>
+                <span>Data Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box unavailable"></div>
+                <span>Data Unavailable</span>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Table -->
     <div class="table-container">
       <table class="status-table">
         <thead>
@@ -30,24 +57,22 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="country in countries" :key="country.name">
+          <tr v-for="country in countries" :key="country.value">
             <td class="country-name">{{ country.name }}</td>
             <td 
               v-for="hour in hours" 
-              :key="`${country.name}-${hour}`"
+              :key="`${country.value}-${hour}`"
               class="status-cell"
               :class="getStatusClass(country, hour)"
               @mouseenter="showTooltip($event, country, hour)"
               @mouseleave="hideTooltip"
             >
-              <!-- Cell is now fully colored, no inner rectangle needed -->
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Tooltip -->
     <div 
       v-if="tooltip.visible" 
       class="tooltip"
@@ -61,96 +86,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'PowerLoadStatus',
-  data() {
-    return {
-      countries: [
-        { name: 'Germany' },
-        { name: 'France' },
-        { name: 'UK' },
-        { name: 'Spain' },
-        { name: 'Italy' }
-      ],
-      hours: Array.from({ length: 24 }, (_, i) => i),
-      measurements: {},
-      tooltip: {
-        visible: false,
-        x: 0,
-        y: 0,
-        country: '',
-        time: '',
-        status: '',
-        load: null
-      }
-    }
-  },
-  created() {
-    this.generateMeasurements()
-  },
-  methods: {
-    formatTime(hour) {
-      return `${hour.toString().padStart(2, '0')}:00`
-    },
-    
-    generateMeasurements() {
-      // Simulate measurement data
-      this.countries.forEach(country => {
-        this.measurements[country.name] = {}
-        this.hours.forEach(hour => {
-          const rand = Math.random()
-          if (rand > 0.15) {
-            // Data available
-            this.measurements[country.name][hour] = {
-              status: 'available',
-              load: (Math.random() * 30 + 20).toFixed(2) // 20-50 GW
-            }
-          } else {
-            // Data unavailable
-            this.measurements[country.name][hour] = {
-              status: 'unavailable',
-              load: null
-            }
-          }
-        })
-      })
-    },
-    
-    getStatusClass(country, hour) {
-      const measurement = this.measurements[country.name]?.[hour]
-      if (!measurement) return 'unavailable'
-      return measurement.status
-    },
-    
-    showTooltip(event, country, hour) {
-      const measurement = this.measurements[country.name]?.[hour]
-      if (!measurement) return
-      
-      this.tooltip = {
-        visible: true,
-        x: event.clientX + 10,
-        y: event.clientY + 10,
-        country: country.name,
-        time: this.formatTime(hour),
-        status: this.getStatusText(measurement.status),
-        load: measurement.load
-      }
-    },
-    
-    hideTooltip() {
-      this.tooltip.visible = false
-    },
-    
-    getStatusText(status) {
-      const statusMap = {
-        available: 'Data Available',
-        unavailable: 'Data Unavailable',
-      }
-      return statusMap[status] || status
-    }
-  }
-}
+<script setup>
+/* eslint-disable */
+import { useTransmissionStatus } from './useTransmissionStatus';
+
+const {    
+    countries,
+    interval,
+    hours,
+    tooltip,
+    formatTime,
+    getStatusClass,
+    showTooltip,
+    hideTooltip
+    } = useTransmissionStatus();
 </script>
 
+<style lang="scss" src="@/styles/DashboardCommon.scss" scoped></style>
 <style lang="scss" src="@/styles/TransmissionStatus.scss" scoped></style>

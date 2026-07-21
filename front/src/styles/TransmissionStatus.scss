@@ -172,3 +172,64 @@ h2 {
     padding: 8px;
   }
 }
+
+.controls {
+  display: flex;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+
+  .controls-left {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5rem;
+    flex: 4;
+
+    .controls-left-first {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .controls-left-second {
+      display: flex;
+    }
+  }
+
+  .controls-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    flex: 3;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .controls-left {
+      flex-direction: column;
+      width: 100%;
+      gap: 1rem;
+    }
+
+    .controls-left-first,
+    .controls-left-second {
+      flex-direction: column;
+      width: 100%;
+      gap: 0.75rem;
+    }
+
+    .controls-right {
+      justify-content: center;
+      width: 100%;
+      margin-top: 1rem;
+    }
+  }
+}
