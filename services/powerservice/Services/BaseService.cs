@@ -4,6 +4,12 @@ namespace PowerService.Services
     {
         protected readonly ILogger<T> _logger;
 
+        public readonly HashSet<string> allowedCountriesHour = new(StringComparer.OrdinalIgnoreCase) 
+        { "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "ME", "NL", "NO", "PL", "PT", "RO", "RS", "SE", "SI", "SK", "UA" };
+
+        public readonly HashSet<string> allowedCountriesQuarter = new(StringComparer.OrdinalIgnoreCase) 
+        { "AT", "BE", "DE", "HU", "LU", "NL" };
+
         public BaseService(ILogger<T> logger)
         {
             _logger = logger;

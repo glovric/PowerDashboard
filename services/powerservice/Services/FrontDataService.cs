@@ -328,7 +328,7 @@ namespace PowerService.Services
                     : ExportExcel(request);
         }
 
-        public List<TransmissionResponse> GetTransmissionStatus(DateTime date, int interval)
+        public object? GetTransmissionStatus(DateTime date, int interval)
         {
 
             var startDate = date;
@@ -378,8 +378,17 @@ namespace PowerService.Services
                                     }
                                 })
                             .ToList();
-                Console.WriteLine($"Kolicina dbresults: {dbResults.Count}");
-                return dbResults;
+
+                var result = allowedCountriesHour.ToDictionary(
+                    country => country,
+                    country => dbResults.Select(x => new PowerDataResponse
+                    {
+                        TimestampLabel = x.Timestamp,
+                        LoadValue = x.Loads[country]
+                    }).ToList()
+                );
+
+                return result;
             }
             else {
                 IQueryable<PowerDataQuarter> query = _context.PowerDataQuarter;
@@ -398,8 +407,17 @@ namespace PowerService.Services
                                     }
                                 })
                             .ToList();
-                Console.WriteLine($"Kolicina dbresults: {dbResults.Count}");
-                return dbResults;
+
+                var result = allowedCountriesQuarter.ToDictionary(
+                    country => country,
+                    country => dbResults.Select(x => new PowerDataResponse
+                    {
+                        TimestampLabel = x.Timestamp,
+                        LoadValue = x.Loads[country]
+                    }).ToList()
+                );
+                
+                return result;
             }
 
         }        

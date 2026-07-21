@@ -18,9 +18,9 @@
 
             <div class="controls-left-second">
                 <div class="control-group">
-                    <label>Forecast Date & Time</label>
+                    <label>Date</label>
                     <Flatpickr
-                    v-model="forecastDate"
+                    v-model="date"
                     :config="datePickerConfig"
                     class="datepicker"
                     placeholder="Select forecast date"
@@ -58,14 +58,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="country in countries" :key="country.value">
-            <td class="country-name">{{ country.label }}</td>
-            <td 
-              v-for="timestamp in timestamps" 
-              :key="`${country.value}-${timestamp}`"
+          <tr v-for="[country, loads] in Object.entries(visibleCountries)" :key="country">
+            <td class="country-name">{{ country }}</td>
+            <td
+              v-for="(load, index) in loads"
+              :key="`${country}-${index}`"
               class="status-cell"
-              :class="getStatusClass(country, timestamp)"
-              @mouseenter="showTooltip($event, country, timestamp)"
+              :class="getStatusClass(load)"
+              @mouseenter="showTooltip($event, country, index)"
               @mouseleave="hideTooltip"
             >
             </td>
@@ -94,9 +94,9 @@ import { useTransmissionStatus } from './useTransmissionStatus';
   import 'flatpickr/dist/flatpickr.css';
 
 const {    
-    countries,
+    visibleCountries,
+    date,
     interval,
-    timestamps,
     hours,
     tooltip,
     formatTime,
