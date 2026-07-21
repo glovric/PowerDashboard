@@ -8,6 +8,7 @@ import LoginPage from "@/components/LoginPage/LoginPage.vue";
 import RegisterPage from "@/components/RegisterPage/RegisterPage.vue"
 import ProfilePage from "@/components/ProfilePage.vue"
 import ForecastDashboard from "@/components/ForecastDashboard/ForecastDashboard.vue"
+import TransmissionStatus from "@/components/TransmissionStatus/TransmissionStatus.vue"
 import DatabaseStatus from "@/components/DatabaseStatus/DatabaseStatus.vue"
 import ServiceStatus from "@/components/ServiceStatus/ServiceStatus.vue"
 
@@ -38,6 +39,12 @@ const routes = [
     path: "/forecast",
     name: "Forecast",
     component: ForecastDashboard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/transmission_status",
+    name: "Transmission Status",
+    component: TransmissionStatus,
     meta: { requiresAuth: true }
   },
   {
