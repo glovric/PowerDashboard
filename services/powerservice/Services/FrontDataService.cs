@@ -391,6 +391,7 @@ namespace PowerService.Services
                                 Loads = new Dictionary<string, double?> {
                                     { "AT", p.ATLoadValue },
                                     { "BE", p.BELoadValue },
+                                    { "DE", p.DELoadValue },
                                     { "HU", p.HULoadValue },
                                     { "LU", p.LULoadValue },
                                     { "NL", p.NLLoadValue },

@@ -51,6 +51,7 @@
               v-for="hour in hours" 
               :key="hour" 
               class="time-header"
+              :colspan="interval === 15 ? 4 : 1"
             >
               {{ formatTime(hour) }}
             </th>
@@ -58,13 +59,13 @@
         </thead>
         <tbody>
           <tr v-for="country in countries" :key="country.value">
-            <td class="country-name">{{ country.name }}</td>
+            <td class="country-name">{{ country.label }}</td>
             <td 
-              v-for="hour in hours" 
-              :key="`${country.value}-${hour}`"
+              v-for="timestamp in timestamps" 
+              :key="`${country.value}-${timestamp}`"
               class="status-cell"
-              :class="getStatusClass(country, hour)"
-              @mouseenter="showTooltip($event, country, hour)"
+              :class="getStatusClass(country, timestamp)"
+              @mouseenter="showTooltip($event, country, timestamp)"
               @mouseleave="hideTooltip"
             >
             </td>
@@ -81,7 +82,7 @@
       <div><strong>{{ tooltip.country }}</strong></div>
       <div>Time: {{ tooltip.time }}</div>
       <div>Status: {{ tooltip.status }}</div>
-      <div v-if="tooltip.load">Load: {{ tooltip.load }} GW</div>
+      <div v-if="tooltip.load">Load: {{ tooltip.load }} MW</div>
     </div>
   </div>
 </template>
@@ -89,16 +90,20 @@
 <script setup>
 /* eslint-disable */
 import { useTransmissionStatus } from './useTransmissionStatus';
+  import Flatpickr from 'vue-flatpickr-component';
+  import 'flatpickr/dist/flatpickr.css';
 
 const {    
     countries,
     interval,
+    timestamps,
     hours,
     tooltip,
     formatTime,
     getStatusClass,
     showTooltip,
-    hideTooltip
+    hideTooltip,
+    datePickerConfig
     } = useTransmissionStatus();
 </script>
 

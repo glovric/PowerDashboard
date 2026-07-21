@@ -1,14 +1,16 @@
-import { ref, onMounted } from 'vue';
-import { countries as rawCountries } from '@/utils/dashboardUtils'; 
+import { ref, onMounted, watch } from 'vue';
+import { countries } from '@/utils/dashboardUtils'; 
+import { loadTransmissionData, datePickerConfig } from './transmissionUtils';
 
 export function useTransmissionStatus() {
 
-  const countries = ref(rawCountries.map(c => ({
-    value: c.value,
-    name: c.label
-  })));
+  const interval = ref(15);
 
-  const interval = ref(60);
+  const visibleCountries = countries.filter(
+    country => interval.value !== 15 || country.has15
+  );
+
+  const timestamps = ref([]);
 
   const hours = ref(Array.from({ length: 24 }, (_, i) => i));
   
@@ -28,30 +30,28 @@ export function useTransmissionStatus() {
     return `${hour.toString().padStart(2, '0')}:00`;
   };
 
-  const generateMeasurements = () => {
-    // 2. Use the mapped countries array
-    countries.value.forEach(country => {
-      // Initialize object for this country using its unique value (e.g., "AT")
-      measurements.value[country.value] = {};
-      
-      hours.value.forEach(hour => {
-        const rand = Math.random();
-        
-        if (rand > 0.15) {
-          // Data available
-          measurements.value[country.value][hour] = {
-            status: 'available',
-            load: (Math.random() * 30 + 20).toFixed(2)
-          };
-        } else {
-          // Data unavailable
-          measurements.value[country.value][hour] = {
-            status: 'unavailable',
-            load: null
-          };
+  const generateMeasurements = (response) => {
+
+    console.log(response);
+
+    for (const country of visibleCountries) {
+      console.log("Prolazim kroz ", country.value);
+
+      measurements.value[country.value] = [];
+
+      response.forEach(element => {
+        let currentLoads = element["loads"];
+        if(country.value in currentLoads) {
+          measurements.value[country.value].push({
+            status: currentLoads[country.value] != null ? 'available' : 'unavailable',
+            load: currentLoads[country.value]
+          });
         }
       });
-    });
+    }
+
+    console.log("Measurements nakon mojeg prvog loopa: ", measurements.value);
+
   };
 
   const getStatusClass = (countryValue, hour) => {
@@ -62,7 +62,7 @@ export function useTransmissionStatus() {
 
   const showTooltip = (event, countryLabel, hour) => {
     // Find the country object by label to get its value for lookup
-    const countryObj = countries.value.find(c => c.value === countryLabel.value);
+    const countryObj = countries.find(c => c.value === countryLabel.value);
     if (!countryObj) return;
 
     const measurement = measurements.value[countryObj.value]?.[hour];
@@ -83,20 +83,28 @@ export function useTransmissionStatus() {
     tooltip.value.visible = false;
   };
 
-  onMounted(() => {
-    generateMeasurements();
-    console.log(measurements.value);
-    console.log(hours.value);
+  onMounted(async () => {
+    let timestampCount = interval.value == 60 ? 24 : 96;
+    timestamps.value = Array.from({ length: timestampCount }, (_, i) => i)
+    let result = await loadTransmissionData(interval.value, "2017-01-17T00:00:00.000Z");
+    generateMeasurements(result.data);
+  });
+
+  watch([interval], async () => {
+    let result = await loadTransmissionData(interval.value, "2017-01-17T00:00:00.000Z");
+    generateMeasurements(result.data);
   });
 
   return {
     countries,
     interval,
+    timestamps,
     hours,
     tooltip,
     formatTime,
     getStatusClass,
     showTooltip,
-    hideTooltip
+    hideTooltip,
+    datePickerConfig
   };
 }
