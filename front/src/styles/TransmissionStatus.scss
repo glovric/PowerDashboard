@@ -1,28 +1,3 @@
-.power-load-status {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  width: 100%;
-  max-width: 100vw;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-h2 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-}
-
-/* Legend Styles */
-.legend {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  flex-wrap: wrap;
-}
-
 .legend-items {
   display: flex;
   align-items: center;
@@ -56,7 +31,7 @@ h2 {
 /* Table Styles - No Scroll */
 .table-container {
   overflow: hidden;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border);
   border-radius: 8px;
   width: 100%;
 }
@@ -69,10 +44,10 @@ h2 {
 }
 
 .country-header {
-  background: #34495e;
-  color: white;
+  background: var(--bg-secondary);
+  color: var(--text);
   padding: 12px;
-  text-align: left;
+  text-align: center;
   width: 120px;
   position: sticky;
   left: 0;
@@ -80,9 +55,10 @@ h2 {
 }
 
 .time-header {
-  background: #34495e;
-  color: white;
+  background: var(--bg-secondary);
+  color: var(--text);
   padding: 12px 4px;
+  border-right: 0.5px solid #dee2e6;
   text-align: center;
   font-size: 11px;
   width: calc((100% - 120px) / 24);
@@ -95,8 +71,9 @@ h2 {
 .country-name {
   padding: 12px;
   font-weight: 600;
-  background: #ecf0f1;
+  background: var(--bg-secondary);
   border-right: 2px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
   position: sticky;
   left: 0;
   z-index: 5;

@@ -1,6 +1,8 @@
 <template>
-  <div class="power-load-status">
-    <h2>Power Load Transmission Status</h2>
+  <div class="dashboard" :class="{ dark: isDark }">
+    <div class="header">
+      <h2>🔮 Transmission Status</h2>
+    </div>
 
     <div class="controls">
 
@@ -101,6 +103,7 @@ import { useTransmissionStatus } from './useTransmissionStatus';
 const {    
     visibleCountries,
     date,
+    isDark,
     interval,
     hours,
     tooltip,
