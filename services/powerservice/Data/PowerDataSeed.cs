@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using PowerService.Models;
+using PowerService.Models.DatabaseEntities;
 using PowerService.Utils;
 
 namespace PowerService.Data

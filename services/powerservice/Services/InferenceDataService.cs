@@ -1,6 +1,7 @@
 using PowerService.Data;
-using PowerService.Models;
-using Npgsql;
+using PowerService.Models.DatabaseEntities;
+using PowerService.Dtos.Inference;
+using PowerService.Models.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace PowerService.Services
@@ -16,7 +17,7 @@ namespace PowerService.Services
             _context = context;
         }
 
-        public object? GetLastRecords(string country, int count, int interval)
+        public LatestData GetLastRecords(string country, int count, int interval)
         {
             IQueryable<PowerDataBase> query;
 
@@ -32,15 +33,14 @@ namespace PowerService.Services
                             .OrderByDescending(p => p.Timestamp)
                             .Take(interval == 60 ? (count + MaxLag) : (count + MaxLag) * 4) 
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new {
+                            .Select(p => new LoadPoint {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
-                                }
-                            )
+                            })
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm"))
                             .ToArray();
 
             var loadValues = dbResults
@@ -50,10 +50,14 @@ namespace PowerService.Services
             var lastLoadValues = loadValues.TakeLast(count).ToArray();
             var (histLabels, _) = CreateHistogramLabels(lastLoadValues);
 
-            return new { timestamp = timestamps, load = loadValues, histLabels };
+            return new LatestData { 
+                Timestamp = timestamps, 
+                Load = loadValues, 
+                HistLabels = histLabels 
+            };
         }
 
-        public object? GetHistoricRecords(string country, DateTime startDate, DateTime endDate, int interval)
+        public HistoricData GetHistoricRecords(string country, DateTime startDate, DateTime endDate, int interval)
         {
             IQueryable<PowerDataBase> query;
 
@@ -98,10 +102,15 @@ namespace PowerService.Services
                                 .ToArray();
 
             var (histLabels, _) = CreateHistogramLabels(lastLoadValues);
-            return new { timestamp = timestamps, load = loadValues, histLabels };
+
+            return new HistoricData { 
+                Timestamp = timestamps, 
+                Load = loadValues, 
+                HistLabels = histLabels 
+            };
         } 
 
-        public object? GetForecastRecords(string country, DateTime forecastDate, int interval, int horizon )
+        public ForecastData GetForecastRecords(string country, DateTime forecastDate, int interval, int horizon )
         {
             IQueryable<PowerDataBase> query;
 
@@ -138,7 +147,11 @@ namespace PowerService.Services
             var lastLoadValues = loadValues.TakeLast(horizon).ToArray();
             var (histLabels, _) = CreateHistogramLabels(lastLoadValues);
 
-            return new { timestamp = timestamps, load = loadValues, histLabels };
+            return new ForecastData { 
+                Timestamp = timestamps, 
+                Load = loadValues, 
+                HistLabels = histLabels 
+            };
         }
 
     }

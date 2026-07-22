@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PowerService.Models {
+namespace PowerService.Requests {
 
     public class LatestDataRequest
     {

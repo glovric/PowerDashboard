@@ -1,5 +1,8 @@
 using PowerService.Data;
-using PowerService.Models;
+using PowerService.Models.DatabaseEntities;
+using PowerService.Dtos.Front;
+using PowerService.Models.Common;
+using PowerService.Requests;
 using Npgsql;
 using CsvHelper;
 using ClosedXML.Excel;
@@ -18,7 +21,7 @@ namespace PowerService.Services
             _context = context;
         }
 
-        public object? GetLastRecords(string country, int count, int interval)
+        public LatestData GetLastRecords(string country, int count, int interval)
         {
             IQueryable<PowerDataBase> query;
 
@@ -34,15 +37,14 @@ namespace PowerService.Services
                             .OrderByDescending(p => p.Timestamp)
                             .Take(interval == 60 ? count : count * 4)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new {
+                            .Select(p => new LoadPoint {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
-                                }
-                            )
+                            })
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm"))
                             .ToArray();
 
             var loadValues = dbResults
@@ -52,10 +54,16 @@ namespace PowerService.Services
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
             var rampValues = CreateRampData(loadValues);
 
-            return new { labels = timestamps, loadValues, rampValues, histValues, histLabels };
+            return new LatestData{ 
+                Labels = timestamps, 
+                LoadValues = loadValues,
+                RampValues = rampValues, 
+                HistValues = histValues, 
+                HistLabels = histLabels 
+            };
         }
 
-        public object? GetHistoricRecords(string country, DateTime startDate, DateTime endDate, int interval)
+        public HistoricData GetHistoricRecords(string country, DateTime startDate, DateTime endDate, int interval)
         {
             IQueryable<PowerDataBase> query;
 
@@ -70,15 +78,14 @@ namespace PowerService.Services
             var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new {
+                            .Select(p => new LoadPoint {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
-                                }
-                            )
+                            })
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm"))
                             .ToArray();
 
             var loadValues = dbResults
@@ -88,10 +95,17 @@ namespace PowerService.Services
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
             var rampValues = CreateRampData(loadValues);
 
-            return new { labels = timestamps, loadValues, rampValues, histValues, histLabels };
+            return new HistoricData { 
+                Labels = timestamps, 
+                LoadValues = loadValues,
+                RampValues = rampValues, 
+                HistValues = histValues, 
+                HistLabels = histLabels 
+            };
+
         } 
 
-        public object? GetForecastRecords(string country, DateTime forecastDate, int interval, int horizon )
+        public ForecastData GetForecastRecords(string country, DateTime forecastDate, int interval, int horizon )
         {
             IQueryable<PowerDataBase> query;
 
@@ -109,7 +123,7 @@ namespace PowerService.Services
             var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < forecastDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new {
+                            .Select(p => new LoadPoint {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
                                 }
@@ -117,7 +131,7 @@ namespace PowerService.Services
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm"))
                             .ToArray();
 
             var loadValues = dbResults
@@ -128,7 +142,12 @@ namespace PowerService.Services
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
             var rampValues = CreateRampData(loadValues);
 
-            return new { loadValues, rampValues, histValues, histLabels };
+            return new ForecastData { 
+                LoadValues = loadValues,
+                RampValues = rampValues, 
+                HistValues = histValues, 
+                HistLabels = histLabels 
+            };
         }
 
         public double?[] CreateRampData(double?[] loadValues)
@@ -340,8 +359,8 @@ namespace PowerService.Services
                 var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new TransmissionResponse {
-                                Timestamp = p.Timestamp.ToString(),
+                            .Select(p => new TransmissionStatus {
+                                Timestamp = p.Timestamp,
                                 Loads = new Dictionary<string, double?> {
                                     { "AT", p.ATLoadValue },
                                     { "BE", p.BELoadValue },
@@ -381,9 +400,9 @@ namespace PowerService.Services
 
                 var result = allowedCountriesHour.ToDictionary(
                     country => country,
-                    country => dbResults.Select(x => new PowerDataResponse
+                    country => dbResults.Select(x => new LoadPoint
                     {
-                        TimestampLabel = x.Timestamp,
+                        Timestamp = x.Timestamp,
                         LoadValue = x.Loads[country]
                     }).ToList()
                 );
@@ -395,8 +414,8 @@ namespace PowerService.Services
                 var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new TransmissionResponse {
-                                Timestamp = p.Timestamp.ToString(),
+                            .Select(p => new TransmissionStatus {
+                                Timestamp = p.Timestamp,
                                 Loads = new Dictionary<string, double?> {
                                     { "AT", p.ATLoadValue },
                                     { "BE", p.BELoadValue },
@@ -410,9 +429,9 @@ namespace PowerService.Services
 
                 var result = allowedCountriesQuarter.ToDictionary(
                     country => country,
-                    country => dbResults.Select(x => new PowerDataResponse
+                    country => dbResults.Select(x => new LoadPoint
                     {
-                        TimestampLabel = x.Timestamp,
+                        Timestamp = x.Timestamp,
                         LoadValue = x.Loads[country]
                     }).ToList()
                 );

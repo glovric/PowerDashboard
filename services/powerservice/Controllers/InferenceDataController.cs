@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PowerService.Models;
+using PowerService.Models.DatabaseEntities;
+using PowerService.Dtos.Inference;
+using PowerService.Requests;
 using PowerService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Shared;
@@ -19,7 +22,7 @@ namespace PowerService.Controllers
 
         [HttpPost("latest")]
         [Authorize(Policy = AuthPolicies.Service)]
-        public async Task<ActionResult<IEnumerable<PowerDataResponse>>> GetLastDbRowsInference([FromBody] LatestDataRequest request)
+        public async Task<ActionResult<LatestData>> GetLastDbRowsInference([FromBody] LatestDataRequest request)
         {
 
             if (request.Count <= 0 || request.Count > 1000)
@@ -49,7 +52,7 @@ namespace PowerService.Controllers
 
         [HttpPost("history")]
         [Authorize(Policy = AuthPolicies.Service)]
-        public async Task<ActionResult<IEnumerable<PowerDataResponse>>> GetHistoricDbRowsInference([FromBody] HistoricDataRequest request)
+        public async Task<ActionResult<HistoricData>> GetHistoricDbRowsInference([FromBody] HistoricDataRequest request)
         {
 
             if (!allowedCountriesHour.Contains(request.Country) && request.Interval == 60)
@@ -74,7 +77,7 @@ namespace PowerService.Controllers
 
         [HttpPost("forecast")]
         [Authorize(Policy = AuthPolicies.Service)]
-        public async Task<ActionResult<IEnumerable<PowerDataResponse>>> GetForecastRecords([FromBody] ForecastDataRequest request)
+        public async Task<ActionResult<ForecastData>> GetForecastRecords([FromBody] ForecastDataRequest request)
         {
             if (!allowedCountriesHour.Contains(request.Country) && request.Interval == 60)
             {

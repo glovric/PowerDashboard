@@ -1,4 +1,4 @@
-namespace PowerService.Models
+namespace PowerService.Models.DatabaseEntities
 {
 
     public abstract class PowerDataBase
@@ -53,15 +53,4 @@ namespace PowerService.Models
         public double? UALoadValue { get; set; }
     }
 
-    public class PowerDataResponse
-    {
-        public string TimestampLabel { get; set; } = default!;
-        public double? LoadValue { get; set; }
-    }
-
-    public class TransmissionResponse
-    {
-        public string Timestamp { get; set; } = default!;
-        public Dictionary<string, double?> Loads { get; set; } = new();
-    }
 }
