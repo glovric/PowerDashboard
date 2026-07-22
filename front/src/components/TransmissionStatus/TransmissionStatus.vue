@@ -53,7 +53,7 @@
       <table class="status-table">
         <thead>
           <tr>
-            <th class="country-header">Country</th>
+            <th class="country-header"></th>
             <th 
               v-for="hour in hours" 
               :key="hour" 

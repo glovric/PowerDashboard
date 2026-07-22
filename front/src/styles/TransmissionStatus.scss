@@ -39,7 +39,7 @@
 .status-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-secondary);
   table-layout: fixed;
 }
 
@@ -58,7 +58,8 @@
   background: var(--bg-secondary);
   color: var(--text);
   padding: 12px 4px;
-  border-right: 0.5px solid #dee2e6;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   text-align: center;
   font-size: 11px;
   width: calc((100% - 120px) / 24);
@@ -72,8 +73,9 @@
   padding: 12px;
   font-weight: 600;
   background: var(--bg-secondary);
-  border-right: 2px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
   position: sticky;
   left: 0;
   z-index: 5;
