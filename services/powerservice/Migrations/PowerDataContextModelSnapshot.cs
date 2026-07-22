@@ -155,7 +155,7 @@ namespace powerservice.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("sk_load_value");
 
-                    b.Property<DateTimeOffset?>("Timestamp")
+                    b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
@@ -201,7 +201,7 @@ namespace powerservice.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("nl_load_value");
 
-                    b.Property<DateTimeOffset?>("Timestamp")
+                    b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 

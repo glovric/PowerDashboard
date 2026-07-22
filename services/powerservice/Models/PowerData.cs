@@ -4,7 +4,7 @@ namespace PowerService.Models
     public abstract class PowerDataBase
     {
         public int Id { get; set; }
-        public DateTimeOffset? Timestamp { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
     }
 
     public class PowerDataQuarter : PowerDataBase

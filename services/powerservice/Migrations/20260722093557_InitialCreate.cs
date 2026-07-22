@@ -50,7 +50,7 @@ namespace powerservice.Migrations
                     si_load_value = table.Column<double>(type: "double precision", nullable: true),
                     sk_load_value = table.Column<double>(type: "double precision", nullable: true),
                     ua_load_value = table.Column<double>(type: "double precision", nullable: true),
-                    timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,7 +69,7 @@ namespace powerservice.Migrations
                     at_load_value = table.Column<double>(type: "double precision", nullable: true),
                     hu_load_value = table.Column<double>(type: "double precision", nullable: true),
                     lu_load_value = table.Column<double>(type: "double precision", nullable: true),
-                    timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

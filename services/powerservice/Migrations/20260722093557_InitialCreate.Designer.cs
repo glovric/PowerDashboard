@@ -12,7 +12,7 @@ using PowerService.Data;
 namespace powerservice.Migrations
 {
     [DbContext(typeof(PowerDataContext))]
-    [Migration("20260415064127_InitialCreate")]
+    [Migration("20260722093557_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -158,7 +158,7 @@ namespace powerservice.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("sk_load_value");
 
-                    b.Property<DateTimeOffset?>("Timestamp")
+                    b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
@@ -204,7 +204,7 @@ namespace powerservice.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("nl_load_value");
 
-                    b.Property<DateTimeOffset?>("Timestamp")
+                    b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 

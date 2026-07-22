@@ -42,7 +42,7 @@ namespace PowerService.Services
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp?.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
                             .ToArray();
 
             var loadValues = dbResults
@@ -78,7 +78,7 @@ namespace PowerService.Services
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp?.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
                             .ToArray();
 
             var loadValues = dbResults
@@ -117,7 +117,7 @@ namespace PowerService.Services
                             .ToList();
 
             var timestamps = dbResults
-                            .Select(p => p.Timestamp?.ToString("yyyy-M-d HH:mm") ?? "")
+                            .Select(p => p.Timestamp.ToString("yyyy-M-d HH:mm") ?? "")
                             .ToArray();
 
             var loadValues = dbResults
