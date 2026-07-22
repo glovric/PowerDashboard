@@ -23,6 +23,14 @@ h2 {
   flex-wrap: wrap;
 }
 
+.legend-items {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
@@ -38,15 +46,11 @@ h2 {
 }
 
 .color-box.available {
-  background: #27ae60;
+  background: #22C55E;
 }
 
 .color-box.unavailable {
-  background: #e74c3c;
-}
-
-.color-box.delayed {
-  background: #f39c12;
+  background: #EF4444;
 }
 
 /* Table Styles - No Scroll */
@@ -119,16 +123,13 @@ h2 {
   }
   
   &.available {
-    background: #27ae60;
+    background: #22C55E;
   }
   
   &.unavailable {
-    background: #e74c3c;
+    background: #EF4444;
   }
-  
-  &.delayed {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-  }
+
 }
 
 /* Tooltip Styles */

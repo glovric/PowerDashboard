@@ -30,13 +30,18 @@
         </div>
 
         <div class="controls-right">
-            <div class="legend-item">
-                <div class="color-box available"></div>
-                <span>Data Available</span>
-            </div>
-            <div class="legend-item">
-                <div class="color-box unavailable"></div>
-                <span>Data Unavailable</span>
+            <div class="control-group">
+              <label>Legend</label>
+              <div class="legend-items">
+                <div class="legend-item">
+                    <div class="color-box available"></div>
+                    <span>Data Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box unavailable"></div>
+                    <span>Data Unavailable</span>
+                </div>
+              </div>
             </div>
         </div>
 
