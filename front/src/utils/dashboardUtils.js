@@ -64,6 +64,7 @@ export const datePickerConfig = {
     enableTime: true,
     dateFormat: 'Y-m-d H:i',
     minDate: '2015-01-01',
+    maxDate: '2020-09-30 23:45',
     time_24hr: true,
     minuteIncrement: 15
 }

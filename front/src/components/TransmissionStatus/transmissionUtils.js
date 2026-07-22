@@ -10,9 +10,7 @@ export const loadTransmissionData = async (resolution, date) => {
 }
 
 export const datePickerConfig = {
-    enableTime: false,
     dateFormat: 'Y-m-d',
     minDate: '2015-01-01',
-    time_24hr: true,
-    minuteIncrement: 15
+    maxDate: '2020-09-30'
 }

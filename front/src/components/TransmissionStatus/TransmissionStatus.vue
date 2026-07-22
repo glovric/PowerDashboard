@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard" :class="{ dark: isDark }">
     <div class="header">
-      <h2>🔮 Transmission Status</h2>
+      <h2>📶 Transmission Status</h2>
     </div>
 
     <div class="controls">
@@ -25,7 +25,7 @@
                     v-model="date"
                     :config="datePickerConfig"
                     class="datepicker"
-                    placeholder="Select forecast date"
+                    placeholder="Select date"
                     />
                 </div>
             </div>

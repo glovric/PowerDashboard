@@ -26,7 +26,7 @@
         </router-link>
 
         <router-link to="/transmission_status" class="nav-link">
-          🗄️ <span class="label">Transmission Status</span>
+          📶 <span class="label">Transmission Status</span>
         </router-link>
 
         <router-link to="/status" class="nav-link">

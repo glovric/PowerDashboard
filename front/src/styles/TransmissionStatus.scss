@@ -73,7 +73,7 @@
   padding: 12px;
   font-weight: 600;
   background: var(--bg-secondary);
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   border-top: 1px solid var(--border);
   position: sticky;
@@ -89,7 +89,7 @@
 .status-cell {
   padding: 0;
   text-align: center;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border);
   height: 40px;
   transition: all 0.3s ease;
   cursor: pointer;
