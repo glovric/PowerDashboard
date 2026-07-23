@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthService.Models
+namespace AuthService.Data.Seed
 {
-    public class User : IdentityUser {}
-
     public class SuperUserSettings
     {
         [Required(ErrorMessage = "SuperUser UserName cannot be empty! Make sure you set a value in settings.")]

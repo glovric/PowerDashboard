@@ -1,8 +1,8 @@
 using System.Threading.RateLimiting;
 
-namespace AuthService.Utils {
+namespace AuthService.Extensions {
 
-    public static class RateLimiting
+    public static class RateLimitingExtension
     {
         public static IServiceCollection AddCustomRateLimiting(this IServiceCollection services)
         {

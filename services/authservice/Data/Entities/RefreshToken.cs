@@ -1,4 +1,4 @@
-namespace AuthService.Models
+namespace AuthService.Data.Entities
 {
     public class RefreshToken
     {

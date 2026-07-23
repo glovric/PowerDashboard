@@ -6,9 +6,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.RateLimiting;
-
-using AuthService.Models;
-using AuthService.Tokens;
+using AuthService.Data.Entities;
+using AuthService.Requests;
+using AuthService.Services;
 using Shared;
 
 namespace AuthService.Controllers {

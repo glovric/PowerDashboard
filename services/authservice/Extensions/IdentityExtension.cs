@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using AuthService.Models;
 using AuthService.Data;
-using Shared;
+using AuthService.Data.Entities;
 
-namespace AuthService.Utils {
+namespace AuthService.Extensions {
 
-    public static class IdentityConfig
+    public static class IdentityExtension
     {
         public static IServiceCollection AddCustomIdentity(this IServiceCollection services)
         {
@@ -72,16 +71,6 @@ namespace AuthService.Utils {
                 options.Conventions.AuthorizeAreaFolder("Identity", "/Admin", "AdminOnly");
             });
 
-            return services;
-        }
-    }
-
-    public static class JwtConfig
-    {
-        public static IServiceCollection InjectJwtSettings(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.Configure<JwtSettings>("Frontend", configuration.GetSection("FrontJwtSettings"));
-            services.Configure<JwtSettings>("Service", configuration.GetSection("ServiceJwtSettings"));
             return services;
         }
     }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using AuthService.Models;
+using AuthService.Data.Entities;
 
-namespace AuthService.Data
+namespace AuthService.Data.Seed
 {
     public class DbSeeder(
         ILogger<DbSeeder> logger,

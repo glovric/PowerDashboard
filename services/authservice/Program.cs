@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using AuthService.Data;
-using AuthService.Utils;
-using AuthService.Tokens;
+using AuthService.Data.Seed;
+using AuthService.Services;
+using AuthService.Extensions;
 using Shared;
-using AuthService.Models;
 using Serilog;
 
 // Dev mode: load .env file in Shared folder if exists

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using AuthService.Models;
+using AuthService.Data.Entities;
 
 namespace AuthService.Pages.Admin
 {

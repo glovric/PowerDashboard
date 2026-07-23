@@ -6,13 +6,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-
-using AuthService.Models;
+using AuthService.Data.Entities;
 using AuthService.Data;
 using Shared;
 
-
-namespace AuthService.Tokens {
+namespace AuthService.Services {
 
     public class TokenService
     {
