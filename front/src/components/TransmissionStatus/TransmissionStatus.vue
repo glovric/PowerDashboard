@@ -65,7 +65,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="[country, loads] in Object.entries(visibleCountries)" :key="country">
+          <tr v-for="[country, loads] in Object.entries(countries)" :key="country">
             <td class="country-name">{{ country }}</td>
             <td
               v-for="(load, index) in loads"
@@ -88,7 +88,6 @@
     >
       <div><strong>{{ tooltip.country }}</strong></div>
       <div>Time: {{ tooltip.time }}</div>
-      <div>Status: {{ tooltip.status }}</div>
       <div v-if="tooltip.load">Load: {{ tooltip.load }} MW</div>
     </div>
   </div>
@@ -101,7 +100,7 @@ import { useTransmissionStatus } from './useTransmissionStatus';
   import 'flatpickr/dist/flatpickr.css';
 
 const {    
-    visibleCountries,
+    countries,
     date,
     isDark,
     interval,
