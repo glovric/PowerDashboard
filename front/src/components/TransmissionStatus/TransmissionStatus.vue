@@ -60,7 +60,7 @@
               class="time-header"
               :colspan="interval === 15 ? 4 : 1"
             >
-              {{ formatTime(hour) }}
+              {{ formatTime(hour, 60) }}
             </th>
           </tr>
         </thead>
@@ -73,6 +73,7 @@
               class="status-cell"
               :class="getStatusClass(load)"
               @mouseenter="showTooltip($event, country, index)"
+              @mousemove="moveTooltip"
               @mouseleave="hideTooltip"
             >
             </td>
@@ -110,6 +111,7 @@ const {
     getStatusClass,
     showTooltip,
     hideTooltip,
+    moveTooltip,
     datePickerConfig
     } = useTransmissionStatus();
 </script>

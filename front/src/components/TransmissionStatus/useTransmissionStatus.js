@@ -24,16 +24,22 @@ export function useTransmissionStatus() {
   });
 
   const showTooltip = (event, countryLabel, hour) => {
-    const measurement = countries.value[countryLabel]?.[hour];
+    const loadValue = countries.value[countryLabel]?.[hour];
 
     tooltip.value = {
       visible: true,
-      x: event.clientX + 50,
+      x: event.clientX - 150,
       y: event.clientY - 50,
       country: countryLabel,
       time: formatTime(hour, interval.value),
-      load: measurement
+      load: loadValue
     };
+  };
+
+  const moveTooltip = (event) => {
+    if (!tooltip.value.visible) return;
+    tooltip.value.x = event.clientX - 150;  
+    tooltip.value.y = event.clientY - 50;
   };
 
   const hideTooltip = () => {
@@ -54,7 +60,7 @@ export function useTransmissionStatus() {
 
   return { 
     countries, isDark, date, interval, hours, tooltip,
-    formatTime, getStatusClass, showTooltip, hideTooltip, 
+    formatTime, getStatusClass, showTooltip, hideTooltip, moveTooltip,
     datePickerConfig
   };
 }
