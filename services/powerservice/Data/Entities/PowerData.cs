@@ -1,4 +1,4 @@
-namespace PowerService.Models.DatabaseEntities
+namespace PowerService.Data.Entities
 {
 
     public abstract class PowerDataBase

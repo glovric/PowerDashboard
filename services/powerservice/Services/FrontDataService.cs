@@ -1,13 +1,11 @@
 using PowerService.Data;
-using PowerService.Models.DatabaseEntities;
-using PowerService.Dtos.Front;
-using PowerService.Models.Common;
+using PowerService.Data.Entities;
+using PowerService.DTOs.Front;
+using PowerService.DTOs.Projections;
+using PowerService.Services.Helpers;
 using PowerService.Requests;
 using Npgsql;
-using CsvHelper;
-using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 
 namespace PowerService.Services
 {
@@ -37,7 +35,7 @@ namespace PowerService.Services
                             .OrderByDescending(p => p.Timestamp)
                             .Take(interval == 60 ? count : count * 4)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new LoadPoint {
+                            .Select(p => new LoadMeasurement {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
                             })
@@ -52,7 +50,7 @@ namespace PowerService.Services
                             .ToArray();
 
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
-            var rampValues = CreateRampData(loadValues);
+            var rampValues = ServiceHelpers.CreateRampData(loadValues);
 
             return new LatestData{ 
                 Labels = timestamps, 
@@ -78,7 +76,7 @@ namespace PowerService.Services
             var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new LoadPoint {
+                            .Select(p => new LoadMeasurement {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
                             })
@@ -93,7 +91,7 @@ namespace PowerService.Services
                             .ToArray();
 
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
-            var rampValues = CreateRampData(loadValues);
+            var rampValues = ServiceHelpers.CreateRampData(loadValues);
 
             return new HistoricData { 
                 Labels = timestamps, 
@@ -123,7 +121,7 @@ namespace PowerService.Services
             var dbResults = query
                             .Where(p => p.Timestamp >= startDate && p.Timestamp < forecastDate)
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new LoadPoint {
+                            .Select(p => new LoadMeasurement {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
                                 }
@@ -140,7 +138,7 @@ namespace PowerService.Services
                             .ToArray();
 
             var (histLabels, histValues) = CreateHistogramLabels(loadValues);
-            var rampValues = CreateRampData(loadValues);
+            var rampValues = ServiceHelpers.CreateRampData(loadValues);
 
             return new ForecastData { 
                 LoadValues = loadValues,
@@ -150,73 +148,64 @@ namespace PowerService.Services
             };
         }
 
-        public double?[] CreateRampData(double?[] loadValues)
+        public TransmissionStatus GetTransmissionStatus(DateTime date, int interval)
         {
-            var rampData = new List<double?>();
 
-            for(int i = 1; i < loadValues.Length; i++)
+            var startDate = date;
+            var endDate = date.AddDays(1);
+
+            if (interval == 60)
             {
-                if(loadValues[i] == null || loadValues[i - 1] == null)
+                IQueryable<PowerDataHour> query = _context.PowerDataHour;
+                var dbResults = query
+                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
+                            .OrderBy(p => p.Timestamp)
+                            .Select(p => new TransmissionStatusProjection {
+                                Timestamp = p.Timestamp,
+                                Loads = ServiceHelpers.BuildHourCountryLoads(p)
+                            })
+                            .ToList();
+
+                var result = new TransmissionStatus
                 {
-                    rampData.Add(null);
-                }
-                else {
-                    rampData.Add(loadValues[i] - loadValues[i - 1]);
-                }
+                    Data = allowedCountriesHour.ToDictionary(
+                        country => country,
+                        country => dbResults.Select(x => new LoadMeasurement
+                        {
+                            Timestamp = x.Timestamp,
+                            LoadValue = x.Loads[country]
+                        }).ToList()
+                    )
+                };
+
+                return result;
             }
+            else {
+                IQueryable<PowerDataQuarter> query = _context.PowerDataQuarter;
+                var dbResults = query
+                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
+                            .OrderBy(p => p.Timestamp)
+                            .Select(p => new TransmissionStatusProjection {
+                                Timestamp = p.Timestamp,
+                                Loads = ServiceHelpers.BuildQuarterCountryLoads(p)
+                                })
+                            .ToList();
 
-            return rampData.ToArray();
-        }
-
-        public async Task<(string LastTime, long Count)?> GetTableStatsAsync(NpgsqlConnection conn, string tableName)
-        {
-            const string sql = @"
-                SELECT 
-                    TO_CHAR(MAX(""timestamp""), 'YYYY-MM-DD HH24:MI:SS') AS last_time,
-                    COUNT(*) AS total_count
-                FROM {0};";
-
-            var query = string.Format(sql, tableName);
-
-            await using var cmd = new NpgsqlCommand(query, conn);
-            await using var reader = await cmd.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
-            {
-                var lastTime = reader.IsDBNull(0) ? "No Data" : reader.GetString(0);
-                var count = reader.IsDBNull(1) ? 0L : reader.GetInt64(1);
+                var result = new TransmissionStatus
+                {
+                    Data = allowedCountriesQuarter.ToDictionary(
+                        country => country,
+                        country => dbResults.Select(x => new LoadMeasurement
+                        {
+                            Timestamp = x.Timestamp,
+                            LoadValue = x.Loads[country]
+                        }).ToList()
+                    )
+                };
                 
-                return (lastTime, count);
+                return result;
             }
 
-            return null;
-        }
-
-        public async Task<long> GetTableSizeAsync(NpgsqlConnection conn, string tableName)
-        {
-            // pg_total_relation_size includes table data, indexes, and toast tables
-            var sql = $"SELECT pg_total_relation_size('{tableName}');";
-            
-            await using var cmd = new NpgsqlCommand(sql, conn);
-            var result = await cmd.ExecuteScalarAsync();
-
-            if (result == null || result == DBNull.Value) return 0;
-
-            long bytes = Convert.ToInt64(result);
-            return bytes;
-        }
-
-        public async Task<long> GetDatabaseSizeAsync(NpgsqlConnection conn)
-        {
-            const string sql = "SELECT pg_database_size(current_database());";
-
-            await using var cmd = new NpgsqlCommand(sql, conn);
-            var result = await cmd.ExecuteScalarAsync();
-
-            if (result == null || result == DBNull.Value) return 0;
-
-            long bytes = Convert.ToInt64(result);
-            return bytes;
         }
 
         public async Task<DbStatus> GetDatabaseStatus()
@@ -230,7 +219,7 @@ namespace PowerService.Services
                 await using var connection = new NpgsqlConnection(connectionString);
                 await connection.OpenAsync();
 
-                var hourStats = await GetTableStatsAsync(connection, "\"PowerDataHour\"");
+                var hourStats = await ServiceHelpers.GetTableStatsAsync(connection, "\"PowerDataHour\"");
                 if (hourStats.HasValue)
                 {
                     status.IsOnline = true;
@@ -238,7 +227,7 @@ namespace PowerService.Services
                     status.TotalRecordsHour = hourStats.Value.Count;
                 }
 
-                var quarterStats = await GetTableStatsAsync(connection, "\"PowerDataQuarter\"");
+                var quarterStats = await ServiceHelpers.GetTableStatsAsync(connection, "\"PowerDataQuarter\"");
                 if (quarterStats.HasValue)
                 {
                     status.IsOnline = true;
@@ -248,9 +237,9 @@ namespace PowerService.Services
 
                 if (status.IsOnline)
                 {
-                    status.SizeHour = await GetTableSizeAsync(connection, "\"PowerDataHour\"");
-                    status.SizeQuarter = await GetTableSizeAsync(connection, "\"PowerDataQuarter\"");
-                    status.SizeDatabase = await GetDatabaseSizeAsync(connection);
+                    status.SizeHour = await ServiceHelpers.GetTableSizeAsync(connection, "\"PowerDataHour\"");
+                    status.SizeQuarter = await ServiceHelpers.GetTableSizeAsync(connection, "\"PowerDataQuarter\"");
+                    status.SizeDatabase = await ServiceHelpers.GetDatabaseSizeAsync(connection);
                 }
             }
             catch(Exception)
@@ -261,185 +250,26 @@ namespace PowerService.Services
             return status;
         }
 
-        private MemoryStream ExportExcel(ExportRequest request)
+        public async Task<ExportResult> ExportTableData(ExportRequest request)
         {
-            var memoryStream = new MemoryStream();
+            var stream = request.ExportFormat == "csv"
+                    ? await ServiceHelpers.ExportCsv(request)
+                    : ServiceHelpers.ExportExcel(request);
 
-            // Create a new workbook
-            using (var workbook = new XLWorkbook())
+            var contentType = request.ExportFormat switch
             {
-                // Add a worksheet
-                var worksheet = workbook.Worksheets.Add("Sheet1");
+                "csv"  => "text/csv",
+                "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                _ => throw new InvalidOperationException()
+            };
 
-                // Write Headers
-                for (int i = 0; i < request.Headers.Count; i++)
-                {
-                    worksheet.Cell(1, i + 1).Value = request.Headers[i];
-                }
-
-                // Write Rows
-                for (int rowIndex = 0; rowIndex < request.Rows.Count; rowIndex++)
-                {
-                    var row = request.Rows[rowIndex];
-                    for (int colIndex = 0; colIndex < request.ColumnKeys.Count; colIndex++)
-                    {
-                        var key = request.ColumnKeys[colIndex];
-                        var value = row.ContainsKey(key) ? row[key]?.ToString() : string.Empty;
-                        worksheet.Cell(rowIndex + 2, colIndex + 1).Value = value;
-                    }
-                }
-
-                // Save to MemoryStream
-                workbook.SaveAs(memoryStream);
-            }
-
-            // Reset stream position so it can be read by controller
-            memoryStream.Position = 0;
-
-            return memoryStream;
-        }
-
-        private async Task<MemoryStream> ExportCsv(ExportRequest request)
-        {
-            var memoryStream = new MemoryStream();
-        
-            // Use 'using' to ensure resources are disposed properly, 
-            // but keep the stream open for the controller to read.
-            using (var writer = new StreamWriter(memoryStream, leaveOpen: true))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            return new ExportResult
             {
-                // Write Headers
-                foreach (var header in request.Headers)
-                {
-                    csv.WriteField(header);
-                }
-                csv.NextRecord();
+                Stream = stream,
+                ContentType = contentType,
+            };
 
-                // Write Rows
-                foreach (var row in request.Rows)
-                {
-                    foreach (var key in request.ColumnKeys)
-                    {
-                        // Safely get value, handle nulls
-                        var value = row.ContainsKey(key) ? row[key]?.ToString() : string.Empty;
-                        csv.WriteField(value);
-                    }
-                    csv.NextRecord();
-                }
-                
-                // Flush the CSV writer to ensure all data is written to the StreamWriter
-                await csv.FlushAsync();
-                
-                // Flush the StreamWriter to ensure all data is written to the MemoryStream
-                await writer.FlushAsync();
-            }
-
-            // Reset position to the beginning so the Controller can read from start
-            memoryStream.Position = 0;
-
-            return memoryStream;
-        }
-
-        public async Task<MemoryStream> ExportTableData(ExportRequest request)
-        {
-            return request.ExportFormat == "csv"
-                    ? await ExportCsv(request)
-                    : ExportExcel(request);
-        }
-
-        public object? GetTransmissionStatus(DateTime date, int interval)
-        {
-
-            var startDate = date;
-            var endDate = date.AddDays(1);
-
-            if (interval == 60)
-            {
-                IQueryable<PowerDataHour> query = _context.PowerDataHour;
-                var dbResults = query
-                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
-                            .OrderBy(p => p.Timestamp)
-                            .Select(p => new TransmissionStatus {
-                                Timestamp = p.Timestamp,
-                                Loads = new Dictionary<string, double?> {
-                                    { "AT", p.ATLoadValue },
-                                    { "BE", p.BELoadValue },
-                                    { "BG", p.BGLoadValue },
-                                    { "CH", p.CHLoadValue },
-                                    { "CY", p.CYLoadValue },
-                                    { "CZ", p.CZLoadValue },
-                                    { "DE", p.DELoadValue },
-                                    { "DK", p.DKLoadValue },
-                                    { "EE", p.EELoadValue },
-                                    { "ES", p.ESLoadValue },
-                                    { "FI", p.FILoadValue },
-                                    { "FR", p.FRLoadValue },
-                                    { "GB", p.GBLoadValue },
-                                    { "GR", p.GRLoadValue },
-                                    { "HR", p.HRLoadValue },
-                                    { "HU", p.HULoadValue },
-                                    { "IE", p.IELoadValue },
-                                    { "IT", p.ITLoadValue },
-                                    { "LT", p.LTLoadValue },
-                                    { "LU", p.LULoadValue },
-                                    { "LV", p.LVLoadValue },
-                                    { "ME", p.MELoadValue },
-                                    { "NL", p.NLLoadValue },
-                                    { "NO", p.NOLoadValue },
-                                    { "PL", p.PLLoadValue },
-                                    { "PT", p.PTLoadValue },
-                                    { "RO", p.ROLoadValue },
-                                    { "RS", p.RSLoadValue },
-                                    { "SE", p.SELoadValue },
-                                    { "SI", p.SILoadValue },
-                                    { "SK", p.SKLoadValue },
-                                    { "UA", p.UALoadValue }
-                                    }
-                                })
-                            .ToList();
-
-                var result = allowedCountriesHour.ToDictionary(
-                    country => country,
-                    country => dbResults.Select(x => new LoadPoint
-                    {
-                        Timestamp = x.Timestamp,
-                        LoadValue = x.Loads[country]
-                    }).ToList()
-                );
-
-                return result;
-            }
-            else {
-                IQueryable<PowerDataQuarter> query = _context.PowerDataQuarter;
-                var dbResults = query
-                            .Where(p => p.Timestamp >= startDate && p.Timestamp < endDate)
-                            .OrderBy(p => p.Timestamp)
-                            .Select(p => new TransmissionStatus {
-                                Timestamp = p.Timestamp,
-                                Loads = new Dictionary<string, double?> {
-                                    { "AT", p.ATLoadValue },
-                                    { "BE", p.BELoadValue },
-                                    { "DE", p.DELoadValue },
-                                    { "HU", p.HULoadValue },
-                                    { "LU", p.LULoadValue },
-                                    { "NL", p.NLLoadValue },
-                                    }
-                                })
-                            .ToList();
-
-                var result = allowedCountriesQuarter.ToDictionary(
-                    country => country,
-                    country => dbResults.Select(x => new LoadPoint
-                    {
-                        Timestamp = x.Timestamp,
-                        LoadValue = x.Loads[country]
-                    }).ToList()
-                );
-                
-                return result;
-            }
-
-        }        
+        }  
 
     }
 }

@@ -1,8 +1,8 @@
 using System.Threading.RateLimiting;
 
-namespace PowerService.Utils {
+namespace PowerService.Extensions {
 
-    public static class RateLimiting
+    public static class RateLimitingExtension
     {
         public static IServiceCollection AddCustomRateLimiting(this IServiceCollection services)
         {

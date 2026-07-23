@@ -1,9 +1,10 @@
-namespace PowerService.Dtos.Front
+using PowerService.DTOs.Projections;
+
+namespace PowerService.DTOs.Front
 {
 
-    public class LatestData
+    public class FrontDTOBase
     {
-        public string[]? Labels { get; set; }
         public double?[]? LoadValues { get; set; }
 
         public double?[]? RampValues { get; set; }
@@ -11,26 +12,20 @@ namespace PowerService.Dtos.Front
         public int[]? HistValues { get; set; }
 
         public string[]? HistLabels { get; set; }
+    }
 
+    public class LatestData : FrontDTOBase
+    {
+        public string[]? Labels { get; set; }
     }
 
     public class HistoricData : LatestData {}
 
-    public class ForecastData
-    {
-        public double?[]? LoadValues { get; set; }
-
-        public double?[]? RampValues { get; set; }
-
-        public int[]? HistValues { get; set; }
-
-        public string[]? HistLabels { get; set; }
-    }
+    public class ForecastData : FrontDTOBase {}
 
     public class TransmissionStatus
     {
-        public DateTimeOffset Timestamp { get; set; } = default!;
-        public Dictionary<string, double?> Loads { get; set; } = new();
+        public Dictionary<string, List<LoadMeasurement>> Data { get; set; } = new();
     }
 
     public class DbStatus
@@ -44,4 +39,11 @@ namespace PowerService.Dtos.Front
         public long SizeQuarter { get; set; } = 0;
         public long SizeDatabase { get; set; } = 0;
     }
+
+    public class ExportResult
+    {
+        public Stream Stream { get; init; } = default!;
+        public string ContentType { get; init; } = default!;
+    }
+
 }

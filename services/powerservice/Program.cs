@@ -1,6 +1,7 @@
 using PowerService.Data;
+using PowerService.Data.Seed;
 using PowerService.Services;
-using PowerService.Utils;
+using PowerService.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared;

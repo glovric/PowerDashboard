@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using PowerService.Models.DatabaseEntities;
-using PowerService.Utils;
+using PowerService.Data.Entities;
 
-namespace PowerService.Data
+namespace PowerService.Data.Seed
 {
     
     public class DbSeeder(

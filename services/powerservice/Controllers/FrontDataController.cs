@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using PowerService.Models.DatabaseEntities;
-using PowerService.Dtos.Front;
+using PowerService.DTOs.Front;
 using PowerService.Requests;
 using PowerService.Services;
 using Shared;
@@ -113,8 +112,8 @@ namespace PowerService.Controllers
         }
 
         [HttpPost("transmission_status")]
-        //[Authorize(Policy = AuthPolicies.FrontendPrivate)]
-        public async Task<ActionResult<PowerDataBase>> GetTransmissionStatus([FromBody] TransmissionRequest request)
+        [Authorize(Policy = AuthPolicies.FrontendPrivate)]
+        public async Task<ActionResult<TransmissionStatus>> GetTransmissionStatus([FromBody] TransmissionRequest request)
         {
             var status = _service.GetTransmissionStatus(request.Date, request.Interval);
             return Ok(status);
@@ -134,16 +133,8 @@ namespace PowerService.Controllers
 
             try
             {
-                var stream = await _service.ExportTableData(request);
-
-                var contentType = request.ExportFormat switch
-                {
-                    "csv"  => "text/csv",
-                    "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    _ => throw new InvalidOperationException()
-                };
-
-                return File(stream, contentType);
+                var result = await _service.ExportTableData(request);
+                return File(result.Stream, result.ContentType);
             }
             catch (Exception ex)
             {

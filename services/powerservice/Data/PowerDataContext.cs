@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PowerService.Models.DatabaseEntities;
+using PowerService.Data.Entities;
 
 namespace PowerService.Data
 {

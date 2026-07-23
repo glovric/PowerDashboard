@@ -1,7 +1,7 @@
 using PowerService.Data;
-using PowerService.Models.DatabaseEntities;
-using PowerService.Dtos.Inference;
-using PowerService.Models.Common;
+using PowerService.Data.Entities;
+using PowerService.DTOs.Inference;
+using PowerService.DTOs.Projections;
 using Microsoft.EntityFrameworkCore;
 
 namespace PowerService.Services
@@ -33,7 +33,7 @@ namespace PowerService.Services
                             .OrderByDescending(p => p.Timestamp)
                             .Take(interval == 60 ? (count + MaxLag) : (count + MaxLag) * 4) 
                             .OrderBy(p => p.Timestamp)
-                            .Select(p => new LoadPoint {
+                            .Select(p => new LoadMeasurement {
                                 Timestamp = p.Timestamp,
                                 LoadValue = EF.Property<double?>(p, country + "LoadValue")
                             })
@@ -77,7 +77,7 @@ namespace PowerService.Services
 
             var finalQuery = query2.Union(query1)
                                   .OrderBy(p => p.Timestamp)
-                                  .Select(p => new {
+                                  .Select(p => new LoadMeasurement {
                                     Timestamp = p.Timestamp,
                                     LoadValue = EF.Property<double?>(p, country + "LoadValue") // tricky?
                                     }
@@ -128,7 +128,7 @@ namespace PowerService.Services
 
             var finalQuery = query1
                                   .OrderBy(p => p.Timestamp)
-                                  .Select(p => new {
+                                  .Select(p => new LoadMeasurement {
                                     Timestamp = p.Timestamp,
                                     LoadValue = EF.Property<double?>(p, country + "LoadValue")
                                     }

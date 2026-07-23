@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PowerService.Models;
-using PowerService.Models.DatabaseEntities;
-using PowerService.Dtos.Inference;
+using PowerService.DTOs.Inference;
 using PowerService.Requests;
 using PowerService.Services;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PowerService.Utils
+namespace PowerService.Data
 {
     public class DataFilesOptions
     {
