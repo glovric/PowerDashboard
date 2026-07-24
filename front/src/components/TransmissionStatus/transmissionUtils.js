@@ -1,6 +1,11 @@
 import { powerApi } from '@/api';
 import { countries } from '@/utils/dashboardUtils'; 
 
+export const datePickerConfig = {
+    dateFormat: 'Y-m-d',
+    minDate: '2015-01-01',
+    maxDate: '2020-09-30'
+}
 
 export const loadTransmissionData = async (resolution, date) => {
     const payload = {
@@ -11,21 +16,27 @@ export const loadTransmissionData = async (resolution, date) => {
     return result;
 }
 
-export const datePickerConfig = {
-    dateFormat: 'Y-m-d',
-    minDate: '2015-01-01',
-    maxDate: '2020-09-30'
-}
+export const transformTransmissionData = (response) => {
 
-export const generateMeasurements = (response) => {
-    return Object.fromEntries(
-        Object.entries(response)
-            .map(([country, values]) => [
-                countries.find(c => c.value === country)?.label ?? country,
-                values.map(x => x.loadValue)
-            ])
-            .sort(([countryA], [countryB]) => countryA.localeCompare(countryB))
+    const transformedData = {};
+
+    for (const [countryCode, values] of Object.entries(response)) {
+        // Find readable country name
+        const countryObj = countries.find(c => c.value === countryCode);
+        const countryName = countryObj ? countryObj.label : countryCode;
+        // Extract load values
+        const loadValues = values.map(x => x.loadValue);
+        // Add to result object
+        transformedData[countryName] = loadValues;
+    }
+
+    // Sort country keys alphabetically
+    const sortedCountryKeys = Object.keys(transformedData).sort((countryA, countryB) => countryA.localeCompare(countryB));
+    const sortedData = Object.fromEntries(
+        sortedCountryKeys.map(key => [key, transformedData[key]])
     );
+
+    return sortedData;
   };
 
 export const getStatusClass = (load) => {
@@ -33,12 +44,12 @@ export const getStatusClass = (load) => {
     return 'available';
 };
 
-export const formatTime = (hour, interval) => {
+export const formatTime = (timestampIndex, interval) => {
     if(interval == 15) {
-        let remaining = hour % 4;
-        let minutes = 15 * remaining;
-        let newHour = Math.floor(hour / 4);
-        return `${newHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        let hourRemainder = timestampIndex % 4;
+        let minutes = 15 * hourRemainder;
+        let hour = Math.floor(timestampIndex / 4);
+        return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
-    return `${hour.toString().padStart(2, '0')}:00`;
-  };
+    return `${timestampIndex.toString().padStart(2, '0')}:00`;
+};

@@ -6,38 +6,6 @@ Chart.register(
   ArcElement
 );
 
-export const chartColors = (isDark) => ({
-  text: isDark ? "#E5E7EB" : "#374151",
-  grid: isDark ? "#374151" : "#E5E7EB",
-  lineTrue: "rgba(66, 165, 245, 1)",
-  fillTrue: isDark ? "rgba(66,165,245,0.15)" : "rgba(66, 165, 245, 0.25)",
-  linePredicted: '#ff6384',
-  fillPredicted: 'rgba(255, 99, 132, 0.3)',
-});
-
-export function updateChartDatasets(chartInstance, newTrueData, newPredictedData, newLabels) {
-  chartInstance.data.labels = newLabels;
-  chartInstance.data.datasets[0].data = newTrueData;
-  if (chartInstance.data.datasets[1]?.data && Array.isArray(newPredictedData) && newPredictedData.length > 0) {
-    chartInstance.data.datasets[1].data = newPredictedData;
-  }
-  chartInstance.resetZoom();
-  chartInstance.update();
-}
-
-export function updateChartColors(chartInstance, colors) {
-  chartInstance.options.plugins.legend.labels.color = colors.text;
-  chartInstance.options.scales.x.ticks.color = colors.text;
-  chartInstance.options.scales.x.grid.color = colors.grid;
-  chartInstance.options.scales.x.title.color = colors.text;
-  chartInstance.options.scales.y.ticks.color = colors.text;
-  chartInstance.options.scales.y.grid.color = colors.grid;
-  chartInstance.options.scales.y.title.color = colors.text;
-  chartInstance.data.datasets[0].backgroundColor = chartInstance.data.datasets[0].fill ? colors.fillTrue : "transparent";
-  chartInstance.resetZoom();
-  chartInstance.update();
-}
-
 export function createPieChart(pieChartRef, sizeHour, sizeQuarter, sizeSystem) {
     let pieChartInstance = new Chart(pieChartRef.value, {
         type: 'doughnut',

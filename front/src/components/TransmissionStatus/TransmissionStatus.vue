@@ -55,7 +55,7 @@
           <tr>
             <th class="country-header"></th>
             <th 
-              v-for="hour in hours" 
+              v-for="hour in hourColumns"
               :key="hour" 
               class="time-header"
               :colspan="interval === 15 ? 4 : 1"
@@ -65,19 +65,29 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="[country, loads] in Object.entries(countries)" :key="country">
-            <td class="country-name">{{ country }}</td>
-            <td
-              v-for="(load, index) in loads"
-              :key="`${country}-${index}`"
-              class="status-cell"
-              :class="getStatusClass(load)"
-              @mouseenter="showTooltip($event, country, index)"
-              @mousemove="moveTooltip"
-              @mouseleave="hideTooltip"
-            >
+          <tr v-if="loading">
+            <td :colspan="totalColumns">
+              <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p>Loading data...</p>
+              </div>
             </td>
           </tr>
+          <template v-else>
+            <tr v-for="[country, loads] in Object.entries(transmissionData)" :key="country">
+              <td class="country-name">{{ country }}</td>
+              <td
+                v-for="(load, index) in loads"
+                :key="`${country}-${index}`"
+                class="status-cell"
+                :class="getStatusClass(load)"
+                @mouseenter="showTooltip($event, country, index)"
+                @mousemove="moveTooltip"
+                @mouseleave="hideTooltip"
+              >
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -95,26 +105,18 @@
 </template>
 
 <script setup>
-/* eslint-disable */
-import { useTransmissionStatus } from './useTransmissionStatus';
   import Flatpickr from 'vue-flatpickr-component';
   import 'flatpickr/dist/flatpickr.css';
+  import { useTransmissionStatus } from './useTransmissionStatus';
 
-const {    
-    countries,
-    date,
-    isDark,
-    interval,
-    hours,
-    tooltip,
-    formatTime,
-    getStatusClass,
-    showTooltip,
-    hideTooltip,
-    moveTooltip,
-    datePickerConfig
-    } = useTransmissionStatus();
+  const { 
+    interval, date, transmissionData, hourColumns, totalColumns,
+    isDark, loading, tooltip, datePickerConfig,
+    showTooltip, hideTooltip, moveTooltip, 
+    formatTime, getStatusClass 
+  } = useTransmissionStatus();
 </script>
 
 <style lang="scss" src="@/styles/DashboardCommon.scss" scoped></style>
 <style lang="scss" src="@/styles/TransmissionStatus.scss" scoped></style>
+<style lang="scss" src="@/styles/LoadingOverlay.scss" scoped></style>
