@@ -19,22 +19,28 @@ Before the service is initialized make sure all the configuration is set in Shar
 dotnet restore
 ```
 
-### Restore .NET tools
+### Restore .NET tools (optional, for migrations)
 
 ```bash
 dotnet tool restore
-```
-
-### Apply DB migrations
-
-```bash
-dotnet ef database update
 ```
 
 ### Build service
 
 ```bash
 dotnet build
+```
+
+### Apply DB migrations
+
+```bash
+dotnet run --migrate-only
+```
+
+### Seed admin user
+
+```bash
+dotnet run --seed-only
 ```
 
 ### Run service

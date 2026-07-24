@@ -47,7 +47,7 @@ namespace PowerService.Services
                             .Select(p => p.LoadValue)
                             .ToArray();
 
-            var lastLoadValues = loadValues.TakeLast(count).ToArray();
+            var lastLoadValues = loadValues.TakeLast(interval == 60 ? count : count * 4).ToArray();
             var (histLabels, _) = CreateHistogramLabels(lastLoadValues);
 
             return new LatestData { 
@@ -144,7 +144,7 @@ namespace PowerService.Services
                             .Select(p => p.LoadValue)
                             .ToArray();
 
-            var lastLoadValues = loadValues.TakeLast(horizon).ToArray();
+            var lastLoadValues = loadValues.TakeLast(interval == 60 ? horizon : horizon * 4).ToArray();
             var (histLabels, _) = CreateHistogramLabels(lastLoadValues);
 
             return new ForecastData { 
