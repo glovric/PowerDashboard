@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 import requests
 from utils.helpers import model_predict_from_response, create_forecast_timestamps
 from schemas.requests import ForecastRequest
-from core.enums import ModelType, parse_interval, parse_country, parse_forecast_horizon
+from core.enums import ModelType, parse_interval, parse_country, parse_forecast_horizon, get_interval_multiplier
 from services.managers import TokenManager, ModelManager
 from dependencies.deps import get_token_manager, get_model_manager
 from core.auth import require_roles
@@ -44,9 +44,11 @@ async def forecast(
         country = parse_country(data.country) # Create Country object
         interval = parse_interval(data.interval) # Create Interval object
         horizon = parse_forecast_horizon(data.horizon) # Create ForecastHorizon object
+        multiplier = get_interval_multiplier(interval) # Create multiplier factor based on interval type
+        predict_count = horizon * multiplier.value # Calculate number of timestamps to predict
         
         model = model_manager.get_forecast_model(country, interval, horizon) # Get model for current country, interval and horizon
-        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.FORECAST) # Predict using current model
+        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.FORECAST, predict_count) # Predict using current model
 
         timestamps = create_forecast_timestamps(data.forecast_date, interval, horizon) # Create timestamps before and after forecast date
 

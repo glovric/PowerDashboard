@@ -3,9 +3,9 @@ import pandas as pd
 import datetime
 import requests
 import xgboost
-from fastapi import HTTPException, Request, status
-from fastapi.responses import Response, JSONResponse
-from core.enums import Interval, ModelType, ForecastHorizon
+from fastapi import HTTPException, Request
+from fastapi.responses import Response
+from core.enums import Interval, ModelType, ForecastHorizon, get_interval_multiplier
 
 def add_cyclical_encoding(df: pd.DataFrame, interval: Interval) -> pd.DataFrame:
     """
@@ -73,7 +73,7 @@ def add_lag_roll_features(df: pd.DataFrame, target: str, interval: Interval, mod
     df : pd.DataFrame
         DataFrame with lag and roll features.
     """
-    multiplier = 4 if interval == Interval.QUARTER else 1 # Multiplier is used to scale properly between 15min and 1h data.
+    multiplier = get_interval_multiplier(interval) # Multiplier is used to scale properly between 15min and 1h data.
 
     if model_type == ModelType.FORECAST: # Forecast model was trained using target variable at timestep t.
         df[f'{target}_lag_0'] = df[target] # This assumes data is available at timestep t (as opposed to nowcast).
@@ -98,7 +98,7 @@ def add_lag_roll_features(df: pd.DataFrame, target: str, interval: Interval, mod
 
     return df
 
-def preprocess_df(df: pd.DataFrame, target: str, interval: Interval, model_type: ModelType) -> pd.DataFrame:
+def preprocess_df(df: pd.DataFrame, target: str, predict_count: int, interval: Interval, model_type: ModelType) -> pd.DataFrame:
     """
     Preprocess DataFrame for model inference. Adds cyclical, lag and roll features.
 
@@ -109,6 +109,9 @@ def preprocess_df(df: pd.DataFrame, target: str, interval: Interval, model_type:
 
     target : str
         Target variable used to calculate lag and roll features.
+
+    predict_count : int
+        Number of last rows to keep after feature engineering. Other rows are discarded because they are only used to calculate lag features.
 
     interval : Interval
         Integer enumeration specifying time interval between data timestamps.
@@ -129,10 +132,11 @@ def preprocess_df(df: pd.DataFrame, target: str, interval: Interval, model_type:
     df = df.set_index("timestamp") # Set index to timestamp column, enables cyclical feature calculation
     df = add_cyclical_encoding(df, interval) # Add cyclical features
     df = add_lag_roll_features(df, target, interval, model_type) # Add lag and roll features
-    df = df.dropna() # Drop NaN rows (sketchy, if targets are mostly NaN everything gets dropped)
+    #df = df.dropna() # Drop NaN rows (sketchy, if targets are mostly NaN everything gets dropped)
+    df = df.iloc[-predict_count:] # Extract only the last predict_count number of rows, all rows before are just used to compute lag features
     return df
 
-def convert_response_to_df(response: requests.Response, interval: Interval, model_type: ModelType) -> pd.DataFrame:
+def convert_response_to_df(response: requests.Response, interval: Interval, model_type: ModelType, predict_count: int) -> pd.DataFrame:
     """
     Converts an HTTP response first to JSON, then to pandas DataFrame. 
     DataFrame object is then preprocessed for model inference.
@@ -157,7 +161,7 @@ def convert_response_to_df(response: requests.Response, interval: Interval, mode
     response_filtered = response.json()
     response_filtered.pop("histLabels")
     df = pd.DataFrame(response_filtered) # Convert response to JSON, then to DataFrame
-    df = preprocess_df(df, target="load", interval=interval, model_type=model_type)
+    df = preprocess_df(df, target="load", predict_count=predict_count, interval=interval, model_type=model_type)
     return df
 
 def calculate_bin_counts(values: list, bin_labels: list[str]) -> list[int]:
@@ -252,7 +256,7 @@ def calculate_bin_counts(values: list, bin_labels: list[str]) -> list[int]:
 
     return counts
 
-def model_predict_from_response(response: requests.Response, model: xgboost.XGBRegressor, interval: Interval, model_type: ModelType) -> tuple[np.ndarray, pd.Index]:
+def model_predict_from_response(response: requests.Response, model: xgboost.XGBRegressor, interval: Interval, model_type: ModelType, predict_count: int) -> tuple[np.ndarray, pd.Index]:
     """
     Runs model inference.
 
@@ -276,7 +280,7 @@ def model_predict_from_response(response: requests.Response, model: xgboost.XGBR
     y_pred, timestamps : tuple[np.ndarray, pd.Index]
         Tuple containing predicted power load values and timestamps.
     """
-    df = convert_response_to_df(response, interval, model_type)
+    df = convert_response_to_df(response, interval, model_type, predict_count)
 
     X = df.drop("load", axis=1).to_numpy() # Drop target variable, convert DataFrame to np.ndarray
     y_pred = model.predict(X) # Run model inference
@@ -326,3 +330,27 @@ async def empty_response_handler(request: Request, exc: HTTPException) -> Respon
     return Response(
         status_code=exc.status_code
     )
+
+def calculate_historic_predict_count(start_date: str, end_date: str, interval: Interval) -> int:
+
+    freq_map = {
+        Interval.QUARTER: pd.Timedelta(minutes=15),
+        Interval.HOUR: pd.Timedelta(hours=1),
+    }
+
+    freq = freq_map[interval]
+    start_ts = pd.Timestamp(start_date)
+    end_ts = pd.Timestamp(end_date)
+
+    # Floor end to the nearest interval boundary BELOW or equal to end
+    floored_end = end_ts.floor(freq)
+
+    if floored_end == end_ts and end_ts > start_ts:
+        floored_end -= freq
+
+    if floored_end <= start_ts:
+        return 0
+
+    delta = floored_end - start_ts
+    count = int(delta // freq) + 1  # +1 because start itself is included
+    return count

@@ -4,6 +4,10 @@ class Interval(IntEnum):
     HOUR = 60
     QUARTER = 15
 
+class IntervalMultiplier(IntEnum):
+    HOUR = 1
+    QUARTER = 4
+
 class ModelType(Enum):
     NOWCAST = "Nowcast"
     FORECAST = "Forecast"
@@ -64,3 +68,8 @@ def parse_forecast_horizon(value: int) -> ForecastHorizon:
         return ForecastHorizon(value)
     except ValueError:
         raise ValueError(f"Invalid forecast horizon: {value}.")
+
+def get_interval_multiplier(interval: Interval):
+    if interval.value == Interval.QUARTER:
+        return IntervalMultiplier.QUARTER
+    return IntervalMultiplier.HOUR

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 import requests
-from utils.helpers import model_predict_from_response
+from utils.helpers import model_predict_from_response, calculate_historic_predict_count
 from schemas.requests import LatestRequest, HistoryRequest
-from core.enums import ModelType, parse_interval, parse_country
+from core.enums import ModelType, parse_interval, parse_country, get_interval_multiplier
 from services.managers import TokenManager, ModelManager
 from dependencies.deps import get_token_manager, get_model_manager
 from core.auth import require_roles
@@ -41,9 +41,11 @@ async def predict(
 
         country = parse_country(data.country) # Create Country object
         interval = parse_interval(data.interval) # Create Interval object
+        multiplier = get_interval_multiplier(interval) # Create multiplier factor based on interval type
+        predict_count = data.count * multiplier.value # Calculate number of timestamps to predict
 
         model = model_manager.get_nowcast_model(country, interval) # Get model for current country and interval 
-        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.NOWCAST) # Predict using current model
+        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.NOWCAST, predict_count) # Predict using current model
         return {"predicted": y_pred.tolist(), "hist": hist, "ramp": ramp.tolist()}
 
     except requests.exceptions.RequestException as e:
@@ -71,11 +73,14 @@ async def predict(
         response = requests.post(url, timeout=5, headers=headers, json=payload)
         response.raise_for_status()
 
-        country = parse_country(data.country)
-        interval = parse_interval(data.interval)
+        country = parse_country(data.country) # Create Country object
+        interval = parse_interval(data.interval) # Create Interval object
+        start_date = data.start_date
+        end_date = data.end_date
+        predict_count = calculate_historic_predict_count(start_date, end_date, interval)
         
         model = model_manager.get_nowcast_model(country, interval)
-        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.NOWCAST)
+        y_pred, hist, ramp = model_predict_from_response(response, model, interval, ModelType.NOWCAST, predict_count)
         return {"predicted": y_pred.tolist(), "hist": hist, "ramp": ramp.tolist()}
 
     except requests.exceptions.RequestException as e:
