@@ -98,7 +98,7 @@ def add_lag_roll_features(df: pd.DataFrame, target: str, interval: Interval, mod
 
     return df
 
-def preprocess_df(df: pd.DataFrame, target: str, predict_count: int, interval: Interval, model_type: ModelType) -> pd.DataFrame:
+def preprocess_df(df: pd.DataFrame, target: str, interval: Interval, model_type: ModelType) -> pd.DataFrame:
     """
     Preprocess DataFrame for model inference. Adds cyclical, lag and roll features.
 
@@ -109,9 +109,6 @@ def preprocess_df(df: pd.DataFrame, target: str, predict_count: int, interval: I
 
     target : str
         Target variable used to calculate lag and roll features.
-
-    predict_count : int
-        Number of last rows to keep after feature engineering. Other rows are discarded because they are only used to calculate lag features.
 
     interval : Interval
         Integer enumeration specifying time interval between data timestamps.
@@ -133,10 +130,9 @@ def preprocess_df(df: pd.DataFrame, target: str, predict_count: int, interval: I
     df = add_cyclical_encoding(df, interval) # Add cyclical features
     df = add_lag_roll_features(df, target, interval, model_type) # Add lag and roll features
     #df = df.dropna() # Drop NaN rows (sketchy, if targets are mostly NaN everything gets dropped)
-    df = df.iloc[-predict_count:] # Extract only the last predict_count number of rows, all rows before are just used to compute lag features
     return df
 
-def convert_response_to_df(response: requests.Response, interval: Interval, model_type: ModelType, predict_count: int) -> pd.DataFrame:
+def convert_response_to_df(response: requests.Response, interval: Interval, model_type: ModelType) -> pd.DataFrame:
     """
     Converts an HTTP response first to JSON, then to pandas DataFrame. 
     DataFrame object is then preprocessed for model inference.
@@ -161,7 +157,7 @@ def convert_response_to_df(response: requests.Response, interval: Interval, mode
     response_filtered = response.json()
     response_filtered.pop("histLabels")
     df = pd.DataFrame(response_filtered) # Convert response to JSON, then to DataFrame
-    df = preprocess_df(df, target="load", predict_count=predict_count, interval=interval, model_type=model_type)
+    df = preprocess_df(df, target="load", interval=interval, model_type=model_type)
     return df
 
 def calculate_bin_counts(values: list, bin_labels: list[str]) -> list[int]:
@@ -275,12 +271,16 @@ def model_predict_from_response(response: requests.Response, model: xgboost.XGBR
         Enumeration indicating which type of model is used for inference. 
         Nowcast model uses shifted target variable to exclude target variable at timestep t.
 
+    predict_count : int
+        Number of last rows to keep after feature engineering. Other rows are discarded because they are only used to calculate lag features.
+
     Returns
     -------
     y_pred, timestamps : tuple[np.ndarray, pd.Index]
         Tuple containing predicted power load values and timestamps.
     """
-    df = convert_response_to_df(response, interval, model_type, predict_count)
+    df = convert_response_to_df(response, interval, model_type)
+    df = df.iloc[-predict_count:] # Extract only the last predict_count number of rows, all rows before are just used to compute lag features
 
     X = df.drop("load", axis=1).to_numpy() # Drop target variable, convert DataFrame to np.ndarray
     y_pred = model.predict(X) # Run model inference
@@ -290,6 +290,49 @@ def model_predict_from_response(response: requests.Response, model: xgboost.XGBR
     ramp_data = pd.Series(y_pred).diff().dropna().to_numpy()
 
     return y_pred, hist_data, ramp_data
+
+def calculate_historic_predict_count(start_date: str, end_date: str, interval: Interval) -> int:
+    """
+    Calculates number of timestamps in the provided date range based on interval type.
+
+    Parameters
+    ----------
+    start_date : str
+        Starting date in ISO 8601 UTC format (e.g., ``2017-01-15T00:00:00.000Z``).
+
+    end_date : str
+        Ending date in ISO 8601 UTC format (e.g., ``2017-01-15T00:00:00.000Z``).
+
+    interval : Interval
+        Integer enumeration specifying time interval between data timestamps.
+
+    Returns
+    -------
+    count : int
+        Number of timestamps in the date range.
+    """
+
+    freq_dict = {
+        Interval.QUARTER: pd.Timedelta(minutes=15),
+        Interval.HOUR: pd.Timedelta(hours=1)
+    }
+
+    freq = freq_dict[interval]
+    start_ts = pd.Timestamp(start_date)
+    end_ts = pd.Timestamp(end_date)
+
+    # Floor end to the nearest interval boundary BELOW or equal to end
+    floored_end = end_ts.floor(freq)
+
+    if floored_end == end_ts and end_ts > start_ts:
+        floored_end -= freq
+
+    if floored_end <= start_ts:
+        return 0
+
+    delta = floored_end - start_ts
+    count = int(delta // freq) + 1  # +1 because start itself is included
+    return count
 
 def create_forecast_timestamps(forecast_date: str, interval: Interval, horizon: ForecastHorizon) -> pd.Index:
     """
@@ -330,27 +373,3 @@ async def empty_response_handler(request: Request, exc: HTTPException) -> Respon
     return Response(
         status_code=exc.status_code
     )
-
-def calculate_historic_predict_count(start_date: str, end_date: str, interval: Interval) -> int:
-
-    freq_map = {
-        Interval.QUARTER: pd.Timedelta(minutes=15),
-        Interval.HOUR: pd.Timedelta(hours=1),
-    }
-
-    freq = freq_map[interval]
-    start_ts = pd.Timestamp(start_date)
-    end_ts = pd.Timestamp(end_date)
-
-    # Floor end to the nearest interval boundary BELOW or equal to end
-    floored_end = end_ts.floor(freq)
-
-    if floored_end == end_ts and end_ts > start_ts:
-        floored_end -= freq
-
-    if floored_end <= start_ts:
-        return 0
-
-    delta = floored_end - start_ts
-    count = int(delta // freq) + 1  # +1 because start itself is included
-    return count
